@@ -1,0 +1,8 @@
+# Archivos y carpetas que Visual Studio genera y no deben subirse
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.db
