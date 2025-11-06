@@ -1,4 +1,4 @@
-using FacturacionElectronica.Components;
+using FacturacionElectronica.Client.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
