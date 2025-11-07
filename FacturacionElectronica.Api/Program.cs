@@ -2,6 +2,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization.Metadata;
+using System.Text.Json.Serialization; 
+
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +13,7 @@ using Microsoft.OpenApi.Models;
 using FacturacionElectronica.Api.Data;
 using FacturacionElectronica.Api.DTOs;
 using FacturacionElectronica.Api.Security;
+using FacturacionElectronica.Api.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +23,9 @@ builder.Services.ConfigureHttpJsonOptions(o =>
 {
   o.SerializerOptions.TypeInfoResolverChain.Clear();
   o.SerializerOptions.TypeInfoResolverChain.Add(new DefaultJsonTypeInfoResolver());
+
+  o.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+  o.SerializerOptions.MaxDepth = 64;
 });
 
 // ---------------- EF Core ----------------
@@ -28,7 +34,7 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 
 // ---------------- JWT ----------------
 var jwtSection = builder.Configuration.GetSection("Jwt");
-var jwtKey = jwtSection["Key"] ?? "CAMBIA_ESTA_CLAVE_LARGA_DE_32+_CHARS";
+var jwtKey = jwtSection["Key"] ?? "R3@lly$tr0ngJwtKey_2025#Factur@cion!";
 var jwtIssuer = jwtSection["Issuer"] ?? "Facturacion.Api";
 var jwtAudience = jwtSection["Audience"] ?? "Facturacion.Client";
 var jwtMinutes = int.TryParse(jwtSection["ExpirationMinutes"], out var mm) ? mm : 60;
@@ -86,6 +92,10 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
+  var httpPort = builder.Configuration["ASPNETCORE_HTTP_PORT"] ?? "5142";
+  var httpsPort = builder.Configuration["ASPNETCORE_HTTPS_PORT"] ?? "7142";
+  c.AddServer(new OpenApiServer { Url = $"https://localhost:{httpsPort}" });
+  c.AddServer(new OpenApiServer { Url = $"http://localhost:{httpPort}" });
 });
 
 var app = builder.Build();
@@ -159,7 +169,151 @@ app.MapPost("/api/auth/login", async (AppDbContext db, LoginRequest req) =>
 
 // ---------------- ENDPOINT PROTEGIDO (admin) ----------------
 //app.MapGet("/api/seguro/admin-solo", () => Results.Ok(new { ok = true, area = "admin" }))
- //  .RequireAuthorization("admin");
+//  .RequireAuthorization("admin");
 
-app.Run();
+
+
+// ---------------- PRODUCTOS ----------------
+app.MapPost("/api/productos", async (AppDbContext db, ProductCreateDto dto) =>
+{
+  if (string.IsNullOrWhiteSpace(dto.TipoProducto) || string.IsNullOrWhiteSpace(dto.Nombre))
+    return Results.BadRequest("TipoProducto y Nombre son obligatorios.");
+
+  var p = new Producto
+  {
+    TipoProducto = dto.TipoProducto.Trim(),
+    Nombre = dto.Nombre.Trim(),
+    Activo = dto.Activo
+  };
+
+  db.Productos.Add(p);
+  await db.SaveChangesAsync();
+  return Results.Created($"/api/productos/{p.ProductoId}", p);
+});
+
+// ==================== LISTAR PRODUCTOS ====================
+app.MapGet("/api/productos", async (AppDbContext db) =>
+{
+  var data = await db.Productos
+      .AsNoTracking()
+      .Include(p => p.Lotes) // cargar los lotes asociados
+      .OrderBy(p => p.Nombre)
+      .Select(p => new
+      {
+        p.ProductoId,
+        p.TipoProducto,
+        p.Nombre,
+        p.Activo,
+        Lotes = p.Lotes.Select(l => new
+        {
+          l.LoteId,
+          l.FechaCompra,
+          l.FechaExpiracion,
+          l.CostoUnitario,
+          l.PrecioVentaUnitario,
+          l.CantidadComprada,
+          l.CantidadDisponible
+        }).ToList()
+      })
+      .ToListAsync();
+
+  return Results.Ok(new { total = data.Count, data });
+});
+
+
+
+app.MapGet("/api/productos/{id:int}", async (AppDbContext db, int id) =>
+{
+  var prod = await db.Productos
+      .AsNoTracking()
+      .Include(p => p.Lotes.OrderBy(l => l.FechaCompra))
+      .FirstOrDefaultAsync(p => p.ProductoId == id);
+
+  return prod is null ? Results.NotFound() : Results.Ok(prod);
+});
+
+app.MapPut("/api/productos/{id:int}", async (AppDbContext db, int id, ProductUpdateDto dto) =>
+{
+  var p = await db.Productos.FindAsync(id);
+  if (p is null) return Results.NotFound();
+
+  p.TipoProducto = dto.TipoProducto.Trim();
+  p.Nombre = dto.Nombre.Trim();
+  p.Activo = dto.Activo;
+
+  await db.SaveChangesAsync();
+  return Results.NoContent();
+});
+
+app.MapDelete("/api/productos/{id:int}", async (AppDbContext db, int id) =>
+{
+  var p = await db.Productos.FindAsync(id);
+  if (p is null) return Results.NotFound();
+
+  p.Activo = false;
+  await db.SaveChangesAsync();
+  return Results.NoContent();
+});
+
+// ---------------- LOTES ----------------
+app.MapPost("/api/lotes", async (AppDbContext db, LoteCreateDto dto) =>
+{
+  var prod = await db.Productos.FindAsync(dto.ProductId);
+  if (prod is null) return Results.BadRequest("Producto no existe.");
+
+  if (dto.CantidadComprada <= 0) return Results.BadRequest("CantidadComprada debe ser > 0.");
+  if (dto.CostoUnitario < 0 || dto.PrecioVentaUnitario < 0) return Results.BadRequest("Precios inválidos.");
+  if (dto.FechaExpiracion is not null && dto.FechaExpiracion < dto.FechaCompra)
+    return Results.BadRequest("La fecha de expiración no puede ser menor que la fecha de compra.");
+
+  var lote = new Lote
+  {
+    ProductoId = dto.ProductId,
+    FechaCompra = dto.FechaCompra,
+    FechaExpiracion = dto.FechaExpiracion,
+    CostoUnitario = dto.CostoUnitario,
+    PrecioVentaUnitario = dto.PrecioVentaUnitario,
+    CantidadComprada = dto.CantidadComprada,
+    CantidadDisponible = dto.CantidadComprada
+  };
+
+  db.Lotes.Add(lote);
+  await db.SaveChangesAsync();
+  var response = new
+  {
+    lote.LoteId,
+    lote.ProductoId,
+    lote.FechaCompra,
+    lote.FechaExpiracion,
+    lote.CostoUnitario,
+    lote.PrecioVentaUnitario,
+    lote.CantidadComprada,
+    lote.CantidadDisponible
+  };
+  return Results.Created($"/api/lotes/{lote.LoteId}", response);
+});
+
+app.MapGet("/api/lotes/por-expirar", async (AppDbContext db, int dias = 30) =>
+{
+  var limite = DateOnly.FromDateTime(DateTime.UtcNow.Date.AddDays(dias));
+  var data = await db.Lotes
+      .AsNoTracking()
+      .Where(l => l.FechaExpiracion != null
+               && l.CantidadDisponible > 0
+               && l.FechaExpiracion <= limite)
+      .OrderBy(l => l.FechaExpiracion)
+      .Select(l => new
+      {
+        l.LoteId,
+        l.ProductoId,
+        Producto = l.Producto!.Nombre,
+        l.FechaCompra,
+        l.FechaExpiracion,
+        l.CantidadDisponible
+      })
+      .ToListAsync();
+
+  return Results.Ok(new { dias, total = data.Count, data });
+});
+
 app.Run();
