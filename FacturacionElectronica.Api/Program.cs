@@ -315,5 +315,88 @@ app.MapGet("/api/lotes/por-expirar", async (AppDbContext db, int dias = 30) =>
 
   return Results.Ok(new { dias, total = data.Count, data });
 });
+// =====================================================================
+//                              USUARIOS (solo admin)
+// =====================================================================
+app.MapPost("/api/usuarios", async (AppDbContext db, CreateUserDto dto) =>
+{
+  // ---------- Validaciones básicas ----------
+  if (string.IsNullOrWhiteSpace(dto.Nombre) ||
+      string.IsNullOrWhiteSpace(dto.Apellido) ||
+      string.IsNullOrWhiteSpace(dto.Correo) ||
+      string.IsNullOrWhiteSpace(dto.Contrasena) ||
+      string.IsNullOrWhiteSpace(dto.Rol))
+  {
+    return Results.BadRequest("Todos los campos (Nombre, Apellido, Correo, Contrasena, Rol) son obligatorios.");
+  }
+
+  var correo = dto.Correo.Trim();
+  var rol = dto.Rol.Trim().ToLowerInvariant();
+  var estado = string.IsNullOrWhiteSpace(dto.Estado) ? "activo" : dto.Estado.Trim().ToLowerInvariant();
+
+  if (rol != "admin" && rol != "empleado")
+    return Results.BadRequest("Rol inválido. Use 'admin' o 'empleado'.");
+
+  if (estado != "activo" && estado != "inactivo")
+    return Results.BadRequest("Estado inválido. Use 'activo' o 'inactivo'.");
+
+  // ---------- Unicidad de correo (case-insensitive) ----------
+  var correoLower = correo.ToLower();
+  var existe = await db.Usuarios
+      .AnyAsync(u => u.Correo.ToLower() == correoLower);
+
+  if (existe)
+    return Results.Conflict($"Ya existe un usuario con el correo: {correo}");
+
+  // ---------- Hash de contraseña ----------
+  var hash = PasswordHasher.Hash(dto.Contrasena);
+
+  // ---------- Crear entidad ----------
+  var user = new Usuario
+  {
+    Nombre = dto.Nombre.Trim(),
+    Apellido = dto.Apellido.Trim(),
+    Correo = correo,
+    ContrasenaHash = hash,
+    Rol = rol,
+    Estado = estado
+  };
+
+  db.Usuarios.Add(user);
+  await db.SaveChangesAsync();
+
+  // ---------- Devolver sin el hash ----------
+  var result = new
+  {
+   // user.Id,
+    user.Nombre,
+    user.Apellido,
+    user.Correo,
+    user.Rol,
+    user.Estado
+  };
+
+  return Results.Created($"/api/usuarios/{user.Id}", result);
+});
+
+app.MapGet("/api/usuarios", async (AppDbContext db) =>
+{
+  var data = await db.Usuarios
+      .AsNoTracking()
+      .OrderBy(u => u.Apellido).ThenBy(u => u.Nombre)
+      .Select(u => new
+      {
+        u.Id,
+        u.Nombre,
+        u.Apellido,
+        u.Correo,
+        u.Rol,
+        u.Estado
+      })
+      .ToListAsync();
+
+  return Results.Ok(new { total = data.Count, data });
+});
+//.RequireAuthorization("admin");
 
 app.Run();

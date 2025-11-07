@@ -1,6 +1,6 @@
 namespace FacturacionElectronica.Api.DTOs;
 
-public record LotResponse(
+/*public record LotResponse(
     int LoteId,
     int ProductoId,
     DateTime FechaCompra,
@@ -10,4 +10,4 @@ public record LotResponse(
     decimal CostoUnitario,
     decimal PrecioVentaUnitario,
     int Stock // stock total del producto después de crear el lote
-);
+);*/
