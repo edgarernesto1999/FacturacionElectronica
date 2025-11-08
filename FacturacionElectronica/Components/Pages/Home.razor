@@ -1,7 +1,71 @@
-﻿@page "/"
+@page "/"
+@inject NavigationManager Nav
+@inject AuthService Auth
 
-<PageTitle>Home</PageTitle>
+<h3>Iniciar sesión</h3>
 
-<h1>Hello, world!</h1>
+<EditForm Model="@model" OnValidSubmit="@OnSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
-Welcome to your new app.
+    <div class="mb-3">
+        <label class="form-label">Correo</label>
+        <InputText @bind-Value="model.Correo" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Contraseña</label>
+        <InputPassword @bind-Value="model.Contrasena" class="form-control" />
+    </div>
+
+    <button class="btn btn-primary" disabled="@busy">
+        @if (busy) { <span>Ingresando...</span> } else { <span>Ingresar</span> }
+    </button>
+
+    @if (!string.IsNullOrWhiteSpace(error))
+    {
+        <div class="alert alert-danger mt-3">@error</div>
+    }
+</EditForm>
+
+@code {
+    private LoginModel model = new();
+    private string? error;
+    private bool busy;
+
+    private async Task OnSubmit()
+    {
+        error = null;
+        busy = true;
+        try
+        {
+            var ok = await Auth.LoginAsync(model.Correo!, model.Contrasena!);
+            if (ok)
+            {
+                // Redirige a una página protegida o al dashboard
+                Nav.NavigateTo("/productos", forceLoad: true);
+            }
+            else
+            {
+                error = "Correo o contraseña incorrectos.";
+            }
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    public class LoginModel
+    {
+        [Required, EmailAddress]
+        public string? Correo { get; set; }
+
+        [Required]
+        public string? Contrasena { get; set; }
+    }
+}

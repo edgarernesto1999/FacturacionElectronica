@@ -16,7 +16,20 @@ using FacturacionElectronica.Api.Security;
 using FacturacionElectronica.Api.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
+builder.Services.AddCors(options =>
+{
+  options.AddPolicy(name: MyAllowSpecificOrigins,
+                    policy =>
+                    {
+                      // Aquí pones la URL de tu cliente Blazor
+                      policy.WithOrigins("https://localhost:7196")
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
+                    });
+});
+builder.Services.AddControllers();
 // ---------------- JSON ----------------
 // Forzamos el resolutor por reflexión para evitar problemas de TypeInfoResolver vacío.
 builder.Services.ConfigureHttpJsonOptions(o =>
@@ -105,7 +118,12 @@ if (app.Environment.IsDevelopment())
   app.UseSwagger();
   app.UseSwaggerUI();
 }
+app.UseHttpsRedirection();
+app.UseCors(MyAllowSpecificOrigins);
 
+app.UseAuthorization();
+
+app.MapControllers();
 app.UseAuthentication();
 app.UseAuthorization();
 

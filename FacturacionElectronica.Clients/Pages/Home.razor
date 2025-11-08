@@ -1,0 +1,92 @@
+@page "/"
+@using FacturacionElectronica.Clients.Auth
+@using FacturacionElectronica.Clients.DTOs
+
+@inject AuthService authService
+@inject NavigationManager navigationManager
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h3 class="mb-0">Iniciar Sesión</h3>
+            </div>
+            <div class="card-body">
+                <EditForm Model="@_loginRequest" OnValidSubmit="HandleLogin">
+                    <DataAnnotationsValidator />
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Correo Electrónico</label>
+                        <InputText id="email" class="form-control" @bind-Value="_loginRequest.Correo" />
+                        <ValidationMessage For="@(() => _loginRequest.Correo)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <InputText id="password" type="password" class="form-control" @bind-Value="_loginRequest.Contrasena" />
+                        <ValidationMessage For="@(() => _loginRequest.Contrasena)" />
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(_mensajeError))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @_mensajeError
+                        </div>
+                    }
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary" disabled="@_procesando">
+                            @if (_procesando)
+                            {
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span> Ingresando...</span>
+                            }
+                            else
+                            {
+                                <span>Ingresar</span>
+                            }
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginRequestDto _loginRequest = new();
+    private string _mensajeError;
+    private bool _procesando = false;
+
+    private async Task HandleLogin()
+    {
+        _procesando = true;
+        _mensajeError = string.Empty;
+
+        try
+        {
+            string userRole = await authService.LoginAsync(_loginRequest);
+
+            switch (userRole?.Trim().ToLower())
+            {
+                case "admin":
+                    navigationManager.NavigateTo("/admin", forceLoad: true);
+                    break;
+                case "empleado":
+                    navigationManager.NavigateTo("/empleado", forceLoad: true);
+                    break;
+                default:
+                    navigationManager.NavigateTo("/", forceLoad: true);
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            _mensajeError = ex.Message;
+        }
+        finally
+        {
+            _procesando = false;
+        }
+    }
+}

@@ -7,7 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
+    <Folder Include="Components\Pages\Admin\" />
+    <Folder Include="Components\Pages\Empleado\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FacturacionElectronica.Api\FacturacionElectronica.Api.csproj" />
   </ItemGroup>
 
 </Project>
