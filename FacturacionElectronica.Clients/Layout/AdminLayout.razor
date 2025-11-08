@@ -1,0 +1,39 @@
+@inherits LayoutComponentBase
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel - Facturación</title>
+
+    @* Referencias a las hojas de estilo (CSS) *@
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link href="css/app.css" rel="stylesheet" />
+
+    @* ================================================================== *@
+    @* === ESTA LÍNEA ES MUY IMPORTANTE === *@
+    @* Carga los estilos específicos para el layout del admin (sidebar, etc.) *@
+    @* ================================================================== *@
+    <link href="css/admin.css" rel="stylesheet" />
+
+    @* Permite que las páginas individuales agreguen contenido al <head> si es necesario *@
+    <HeadOutlet />
+</head>
+<body>
+    @* El contenedor principal que usa Flexbox (definido en admin.css) *@
+    <div class="admin-layout">
+
+        @* Renderiza el componente de la barra de navegación lateral *@
+        <SideNav />
+
+        @* El área de contenido principal *@
+        <main class="main-content">
+            @* Aquí es donde Blazor inyectará el contenido de la página actual *@
+            @* (por ejemplo, todo el código de Home.razor) *@
+            @Body
+        </main>
+
+    </div>
+</body>
+</html>

@@ -1,19 +1,42 @@
 @page "/admin"
 
-<div class="container mt-4">
-    <div class="card text-white bg-primary mb-3">
-        <div class="card-header">
-            <h3>Panel de Administración</h3>
+
+@layout AdminLayout
+
+<div class="admin-home-container">
+    <div class="admin-home-content text-center">
+
+        <h1>Bienvenido, Administrador</h1>
+        <p class="welcome-text">
+            Utilice las herramientas a su disposición para gestionar el contenido y la operativa del sistema.
+        </p>
+
+        <div class="row justify-content-center">
+            @* Hacemos la columna más ancha (col-md-8) y la centramos para un mejor balance visual *@
+            <div class="col-md-8">
+                <div class="nav-card text-start">
+                    <h5 class="card-title">
+                        <span class="oi oi-box" aria-hidden="true"></span>
+                        Gestión de Productos
+                    </h5>
+                    <p class="card-text">
+                        Administre el catálogo completo de productos. Puede ver la lista, editar existentes y agregar nuevos.
+                    </p>
+
+                    @* Botón secundario cambiado a "outline-light" para mejor visibilidad *@
+                    <a href="/admin/productos" class="btn btn-outline-light">
+                        Ver Lista
+                    </a>
+                    <a href="/admin/productos/crear" class="btn btn-primary">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Crear Nuevo
+                    </a>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <h1 class="card-title">Bienvenido, Administrador</h1>
-            <p class="card-text">
-                Usted se encuentra en la sección de administración del sistema.
-            </p>
-        </div>
+
     </div>
 </div>
 
 @code {
-    // Aquí puedes añadir lógica específica para el administrador si la necesitas en el futuro.
+    // No se necesita lógica adicional aquí por ahora.
 }

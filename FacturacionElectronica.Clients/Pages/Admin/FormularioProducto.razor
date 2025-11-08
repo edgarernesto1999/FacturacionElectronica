@@ -1,0 +1,117 @@
+@page "/admin/productos/crear"
+
+@*
+    Este componente renderiza un formulario para crear o editar un producto.
+    - En modo CREACIÓN (Id es null), el formulario está vacío.
+    - En modo EDICIÓN (Id tiene un valor), carga los datos del producto desde la API.
+*@
+
+@* 1. Inyectamos los servicios necesarios *@
+@inject HttpClient Http
+@layout AdminLayout
+@* ================================================================== *@
+@* === CORRECCIÓN 1: Namespace corregido a "Client" (singular) === *@
+@* ================================================================== *@
+@using FacturacionElectronica.Clients.DTOs
+
+
+<h3>@(Id is null ? "Nuevo Producto" : "Editar Producto")</h3>
+
+<EditForm Model="_formModel" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+
+    @* ================================================================================= *@
+    @* === CORRECCIÓN 2: Se reemplaza @bind-Value por enlace manual para inmutabilidad === *@
+    @* ================================================================================= *@
+
+    <div class="mb-3">
+        <label class="form-label">Tipo de Producto:</label>
+        @*
+            - "Value" establece el valor inicial (enlace de una vía).
+            - "@oninput" se dispara cada vez que el usuario escribe.
+            - La expresión lambda crea una COPIA de _formModel con la propiedad actualizada.
+        *@
+        <InputText Value="_formModel.TipoProducto"
+                   ValueChanged="(string value) => _formModel = _formModel with { TipoProducto = value }"
+                   ValueExpression="() => _formModel.TipoProducto"
+                   class="form-control" />
+        <ValidationMessage For="() => _formModel.TipoProducto" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Nombre del Producto:</label>
+        <InputText Value="_formModel.Nombre"
+                   ValueChanged="(string value) => _formModel = _formModel with { Nombre = value }"
+                   ValueExpression="() => _formModel.Nombre"
+                   class="form-control" />
+        <ValidationMessage For="() => _formModel.Nombre" />
+    </div>
+
+    <div class="mb-3 form-check">
+        <InputCheckbox Value="_formModel.Activo"
+                       ValueChanged="(bool value) => _formModel = _formModel with { Activo = value }"
+                       ValueExpression="() => _formModel.Activo"
+                       class="form-check-input" />
+        <label class="form-check-label">Producto Activo</label>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    </div>
+
+</EditForm>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    // El modelo del formulario. Siempre es un DTO simple para la actualización.
+    private ProductUpdateDto _formModel = new("", "", true);
+
+    // Este método se ejecuta cuando el componente se carga o cuando sus parámetros cambian.
+    protected override async Task OnParametersSetAsync()
+    {
+        // Solo cargamos datos si estamos en modo edición (el Id tiene un valor).
+        if (Id is not null)
+        {
+            // Hacemos la llamada a la API esperando la respuesta completa (ProductoApiResponseDto).
+            var productoDesdeApi = await Http.GetFromJsonAsync<ProductoApiResponseDto>($"api/Productos/{Id}");
+
+            if (productoDesdeApi != null)
+            {
+                // Mapeamos los datos de la respuesta completa al modelo simple del formulario.
+                _formModel = new ProductUpdateDto(
+                    productoDesdeApi.TipoProducto,
+                    productoDesdeApi.Nombre,
+                    productoDesdeApi.Activo
+                );
+            }
+        }
+    }
+
+    // Este método se llama cuando el formulario se envía y es válido.
+    private async Task HandleSubmit()
+    {
+        // Determinamos la URL y el método HTTP según si estamos creando o editando.
+        var url = Id is null ? "api/Productos" : $"api/Productos/{Id}";
+        var method = Id is null ? HttpMethod.Post : HttpMethod.Put;
+
+        // Creamos la petición HTTP.
+        var request = new HttpRequestMessage(method, url)
+        {
+            // El cuerpo de la petición es nuestro modelo de formulario serializado a JSON.
+            Content = JsonContent.Create(_formModel)
+        };
+
+        // Enviamos la petición a la API.
+        var response = await Http.SendAsync(request);
+        response.EnsureSuccessStatusCode(); // Lanza una excepción si la API devuelve un error.
+
+        // Invocamos el EventCallback para notificar al componente padre (la página de la lista)
+        // que la operación fue exitosa y que debe refrescar los datos.
+        await OnSubmit.InvokeAsync();
+    }
+}

@@ -4,58 +4,64 @@
 
 @inject AuthService authService
 @inject NavigationManager navigationManager
+@inject IJSRuntime JSRuntime
 
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <h3 class="mb-0">Iniciar Sesión</h3>
+<div class="login-container">
+    <!-- Contenedor para las formas animadas del fondo -->
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+        <div class="shape shape-5"></div>
+        <div class="shape shape-6"></div>
+    </div>
+
+    <!-- Tarjeta del formulario de Login -->
+    <div class="login-card">
+        <h1>Iniciar Sesión</h1>
+        <p>Bienvenido de nuevo</p>
+
+        <EditForm Model="@_loginRequest" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+
+            <div class="form-group">
+                <label for="email">Correo Electrónico</label>
+                <InputText id="email" class="form-control" @bind-Value="_loginRequest.Correo" placeholder="usuario@ejemplo.com" />
+                <ValidationMessage For="@(() => _loginRequest.Correo)" class="validation-message" />
             </div>
-            <div class="card-body">
-                <EditForm Model="@_loginRequest" OnValidSubmit="HandleLogin">
-                    <DataAnnotationsValidator />
 
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Correo Electrónico</label>
-                        <InputText id="email" class="form-control" @bind-Value="_loginRequest.Correo" />
-                        <ValidationMessage For="@(() => _loginRequest.Correo)" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Contraseña</label>
-                        <InputText id="password" type="password" class="form-control" @bind-Value="_loginRequest.Contrasena" />
-                        <ValidationMessage For="@(() => _loginRequest.Contrasena)" />
-                    </div>
-
-                    @if (!string.IsNullOrEmpty(_mensajeError))
-                    {
-                        <div class="alert alert-danger" role="alert">
-                            @_mensajeError
-                        </div>
-                    }
-
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary" disabled="@_procesando">
-                            @if (_procesando)
-                            {
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                <span> Ingresando...</span>
-                            }
-                            else
-                            {
-                                <span>Ingresar</span>
-                            }
-                        </button>
-                    </div>
-                </EditForm>
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <InputText id="password" type="password" class="form-control" @bind-Value="_loginRequest.Contrasena" placeholder="••••••••" />
+                <ValidationMessage For="@(() => _loginRequest.Contrasena)" class="validation-message" />
             </div>
-        </div>
+
+            @if (!string.IsNullOrEmpty(_mensajeError))
+            {
+                <div class="alert alert-danger" role="alert">
+                    @_mensajeError
+                </div>
+            }
+
+            <button type="submit" class="btn-login" disabled="@_procesando">
+                @if (_procesando)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span> Ingresando...</span>
+                }
+                else
+                {
+                    <span>Ingresar</span>
+                }
+            </button>
+        </EditForm>
     </div>
 </div>
 
 @code {
     private LoginRequestDto _loginRequest = new();
-    private string _mensajeError;
+    private string _mensajeError = string.Empty;
     private bool _procesando = false;
 
     private async Task HandleLogin()
@@ -70,23 +76,36 @@
             switch (userRole?.Trim().ToLower())
             {
                 case "admin":
-                    navigationManager.NavigateTo("/admin", forceLoad: true);
+                    navigationManager.NavigateTo("/admin"); // No es necesario forceLoad con Blazor WebAssembly
                     break;
                 case "empleado":
-                    navigationManager.NavigateTo("/empleado", forceLoad: true);
+                    navigationManager.NavigateTo("/empleado");
                     break;
                 default:
-                    navigationManager.NavigateTo("/", forceLoad: true);
+                    // Si el rol no es reconocido o es nulo, podría ser un error de login
+                    _mensajeError = "Rol de usuario no reconocido o credenciales inválidas.";
                     break;
             }
         }
         catch (Exception ex)
         {
-            _mensajeError = ex.Message;
+            // Es mejor mostrar un mensaje genérico al usuario
+            _mensajeError = "Correo o contraseña incorrectos.";
+            // Puedes loguear el ex.Message en la consola del navegador para depuración
+            Console.WriteLine(ex.Message);
         }
         finally
         {
             _procesando = false;
+        }
+    }
+
+    // ESTA PARTE ES CRÍTICA para iniciar la animación
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("initLoginAnimation");
         }
     }
 }

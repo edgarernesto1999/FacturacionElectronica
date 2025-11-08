@@ -1,0 +1,87 @@
+@page "/admin/productos"
+
+@layout AdminLayout
+@* @attribute [Authorize(Roles = "Admin")] *@
+@using FacturacionElectronica.Clients.DTOs
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Gestión de Productos</h3>
+
+<div class="card shadow-sm mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Listado de Productos Registrados</span>
+
+        @* CORRECCIÓN: Se cambió el botón por un enlace 'a' para la navegación directa *@
+        <a href="/admin/productos/crear" class="btn btn-success">
+            <span class="oi oi-plus" aria-hidden="true"></span> Crear Nuevo Producto
+        </a>
+    </div>
+    <div class="card-body">
+        @if (_productos == null)
+        {
+            <p><em>Cargando productos...</em></p>
+        }
+        else
+        {
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Tipo de Producto</th>
+                        <th>Stock Disponible</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var producto in _productos)
+                    {
+                        <tr>
+                            <td>@producto.ProductId</td>
+                            <td>@producto.Nombre</td>
+                            <td>@producto.TipoProducto</td>
+                            <td>
+                                @producto.Lotes.Sum(lote => lote.CantidadDisponible)
+                            </td>
+                            <td>
+                                @if (producto.Activo)
+                                {
+                                    <span class="badge bg-success">Activo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Inactivo</span>
+                                }
+                            </td>
+                            <td>
+                                @* CORRECCIÓN: Se cambió el botón por un enlace 'a' para la navegación directa *@
+                                <a href="@($"/admin/productos/editar/{producto.ProductId}")" class="btn btn-sm btn-primary">
+                                    <span class="oi oi-pencil"></span> Editar
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@code {
+    private List<ProductListItemDto>? _productos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var apiResponse = await Http.GetFromJsonAsync<ProductListApiResponse>("api/Productos");
+
+        if (apiResponse != null)
+        {
+            _productos = apiResponse.Data;
+        }
+    }
+
+    // CORRECCIÓN: Los métodos 'EditarProducto' e 'IrAFormularioNuevo' se han eliminado
+    // porque la navegación ahora se maneja con etiquetas <a> y href.
+}

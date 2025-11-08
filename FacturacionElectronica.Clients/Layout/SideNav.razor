@@ -1,0 +1,25 @@
+@*
+    Versión mejorada del SideNav:
+    - Se elimina la lista <ul> para un control total del estilo.
+    - Se añaden iconos de "Open Iconic" (incluidos en Blazor) para cada enlace.
+    - La estructura es más limpia y semántica.
+*@
+<div class="sidebar">
+    <div class="sidebar-header">
+        Admin Panel
+    </div>
+
+    <nav class="flex-column">
+        <NavLink class="nav-link" href="/admin" Match="NavLinkMatch.All">
+            <span class="oi oi-home" aria-hidden="true"></span> Dashboard
+        </NavLink>
+
+        <NavLink class="nav-link" href="/admin/productos">
+            <span class="oi oi-box" aria-hidden="true"></span> Productos
+        </NavLink>
+
+        <NavLink class="nav-link" href="/admin/usuarios">
+            <span class="oi oi-people" aria-hidden="true"></span> Usuarios
+        </NavLink>
+    </nav>
+</div>
