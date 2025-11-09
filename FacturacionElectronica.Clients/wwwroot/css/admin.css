@@ -1,73 +1,233 @@
 /* ================================================================== */
-/* === ESTILOS MEJORADOS PARA EL PANEL DE ADMINISTRACIÓN === */
+/* === ESTILOS DEFINITIVOS PARA EL PANEL DE ADMINISTRACIÓN (v2) === */
 /* ================================================================== */
 
-body {
-  background-color: #f8f9fa; /* Un fondo neutro para toda la página */
-}
-
+/* --- 1. Contenedor Principal del Layout --- */
 .admin-layout {
   display: flex;
   min-height: 100vh;
 }
 
-/* --- Barra de Navegación Lateral (Sidebar) --- */
+/* --- 2. Barra Lateral de Navegación (Sidebar) --- */
 .sidebar {
   width: 250px;
-  background-color: #2c3e50; /* Azul oscuro/corporativo, más profesional */
-  color: #fff;
   position: fixed;
   top: 0;
   left: 0;
   height: 100%;
+  z-index: 1000;
+  background-color: #2c3e50;
+  color: #fff;
   display: flex;
   flex-direction: column;
+  box-shadow: 3px 0px 15px rgba(0, 0, 0, 0.2);
 }
 
+/* --- 3. Área de Contenido Principal --- */
+.main-content {
+  margin-left: 250px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  /* ================================================================== */
+  /* === CAMBIO 1: Fondo más elegante con un gradiente sutil === */
+  /* ================================================================== */
+  background: linear-gradient(180deg, #0f2027, #203a43, #2c5364);
+}
+
+/* --- 4. Fondo Animado (Contenido DENTRO de .main-content) --- */
+.admin-background-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* --- 5. Contenido de la Página (Wrapper para @Body) --- */
+.page-content-wrapper {
+  position: relative;
+  z-index: 2;
+  padding: 2rem;
+  color: #fff;
+  height: 100%;
+  overflow-y: auto;
+}
+
+
+/* ================================================================== */
+/* === ESTILOS DE LAS FORMAS Y COMPONENTES === */
+/* ================================================================== */
+
+/* Estilos de las formas */
+.shape {
+  position: absolute;
+  border-radius: 50%;
+  /* ================================================================== */
+  /* === CAMBIO 2: Figuras más visibles y con mejor color === */
+  /* ================================================================== */
+  background: linear-gradient(45deg, #1ddde8, #22a7f0, #9b59b6);
+  opacity: 0.25; /* Aumentamos la opacidad para que sean visibles */
+}
+
+.shape-1 {
+  width: 150px;
+  height: 150px;
+  top: 10%;
+  left: 15%;
+}
+
+.shape-2 {
+  width: 80px;
+  height: 80px;
+  top: 25%;
+  left: 80%;
+}
+
+.shape-3 {
+  width: 200px;
+  height: 200px;
+  top: 70%;
+  left: 10%;
+}
+
+.shape-4 {
+  width: 50px;
+  height: 50px;
+  top: 80%;
+  left: 60%;
+}
+
+.shape-5 {
+  width: 120px;
+  height: 120px;
+  top: 40%;
+  left: 40%;
+}
+
+.shape-6 {
+  width: 100px;
+  height: 100px;
+  top: 5%;
+  left: 50%;
+}
+
+/* Estilos del Header y Enlaces del Sidebar */
 .sidebar-header {
   padding: 1.5rem;
   font-size: 1.5rem;
   font-weight: bold;
   text-align: center;
   color: #ecf0f1;
-  border-bottom: 1px solid #34495e; /* Sutil línea divisoria */
+  border-bottom: 1px solid #34495e;
 }
 
-/* --- Estilos para los Enlaces de Navegación --- */
 .sidebar .nav-link {
-  color: #bdc3c7; /* Gris claro para el texto, fácil de leer */
+  color: #bdc3c7;
   padding: 1rem 1.5rem;
   display: flex;
-  align-items: center; /* Alinea el icono y el texto verticalmente */
+  align-items: center;
   text-decoration: none;
   transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
-  /* Efecto al pasar el mouse por encima */
   .sidebar .nav-link:hover {
-    background-color: #34495e; /* Un poco más claro que el fondo */
+    background-color: #34495e;
     color: #fff;
   }
 
-  /* Estilo para el enlace ACTIVO (la página actual) */
   .sidebar .nav-link.active {
-    background-color: #1abc9c; /* El color turquesa que te gustó */
+    background-color: #1abc9c;
     color: #fff;
     font-weight: 600;
   }
 
-  /* Estilo para los iconos */
   .sidebar .nav-link .oi {
-    margin-right: 15px; /* Espacio entre el icono y el texto */
-    font-size: 1.1rem; /* Hace el icono un poco más grande */
-    width: 20px; /* Ancho fijo para alinear el texto */
+    margin-right: 15px;
+    font-size: 1.1rem;
+    width: 20px;
   }
 
-
-/* --- Área de Contenido Principal --- */
-.main-content {
-  margin-left: 250px; /* Mismo ancho que el sidebar para que no se solapen */
-  padding: 2rem;
-  width: 100%;
-  background-color: #fff;
+/* Estilos de las tarjetas y formularios */
+.form-card, .nav-card {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  color: #fff;
+  overflow: hidden;
 }
+
+.form-card-header {
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+  .form-card-header h3 {
+    margin: 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+  }
+
+  .form-card-header .oi {
+    margin-right: 12px;
+    font-size: 1.3rem;
+  }
+
+.form-card-body {
+  padding: 2rem;
+}
+
+.form-card .form-control {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  padding: 0.75rem 1rem;
+}
+
+  .form-card .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .form-card .form-control:focus {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: #1abc9c;
+    color: #fff;
+    box-shadow: 0 0 0 0.25rem rgba(26, 188, 156, 0.25);
+  }
+
+.form-card .form-check-input {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+  .form-card .form-check-input:checked {
+    background-color: #1abc9c;
+    border-color: #1abc9c;
+  }
+
+.form-card .text-muted-white {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.form-card .validation-message {
+  color: #ffc107;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 1.5rem;
+}
+
+  .form-actions .btn {
+    min-width: 150px;
+    font-weight: 600;
+  }
