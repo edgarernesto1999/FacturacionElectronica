@@ -1,7 +1,6 @@
-/* ================================================================== */
+/ /* ================================================================== */
 /* === ESTILOS DEFINITIVOS PARA EL PANEL DE ADMINISTRACIÓN (v2) === */
 /* ================================================================== */
-
 /* --- 1. Contenedor Principal del Layout --- */
 .admin-layout {
   display: flex;
@@ -29,9 +28,6 @@
   width: 100%;
   position: relative;
   overflow: hidden;
-  /* ================================================================== */
-  /* === CAMBIO 1: Fondo más elegante con un gradiente sutil === */
-  /* ================================================================== */
   background: linear-gradient(180deg, #0f2027, #203a43, #2c5364);
 }
 
@@ -64,11 +60,8 @@
 .shape {
   position: absolute;
   border-radius: 50%;
-  /* ================================================================== */
-  /* === CAMBIO 2: Figuras más visibles y con mejor color === */
-  /* ================================================================== */
   background: linear-gradient(45deg, #1ddde8, #22a7f0, #9b59b6);
-  opacity: 0.25; /* Aumentamos la opacidad para que sean visibles */
+  opacity: 0.25;
 }
 
 .shape-1 {
@@ -149,7 +142,7 @@
     width: 20px;
   }
 
-/* Estilos de las tarjetas y formularios */
+/* Estilos de las tarjetas y formularios (Glassmorphism) */
 .form-card, .nav-card {
   background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(12px);
@@ -231,3 +224,114 @@
     min-width: 150px;
     font-weight: 600;
   }
+
+/* ================================================================== */
+/* === ESTILOS DE TABLA TEMÁTICOS (NUEVOS Y CORREGIDOS) === */
+/* ================================================================== */
+
+/* Tabla principal con estética de vidrio y espaciado */
+.table-theme {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: #ecf0f1; /* Blanco suave para mejor lectura */
+}
+
+  /* Cabecera de la tabla */
+  .table-theme thead th {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    /* Fondo ligeramente más opaco y borde para definir */
+    background-color: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  /* Celdas del cuerpo de la tabla */
+  .table-theme tbody td {
+    padding: 1.25rem 1.5rem; /* Celdas altas para sensación de amplitud */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Línea divisoria sutil */
+    vertical-align: middle;
+  }
+
+  /* Eliminar el borde de la última fila para un look limpio */
+  .table-theme tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* Efecto hover que "ilumina" la fila con el color de acento */
+  .table-theme tbody tr:hover {
+    background-color: rgba(26, 188, 156, 0.15); /* #1abc9c con transparencia */
+  }
+
+  /* Columna de acciones centrada */
+  .table-theme .actions-column {
+    text-align: center;
+  }
+
+/* Botones que combinan con el tema oscuro */
+.actions-column .btn-outline-theme {
+  color: #bdc3c7;
+  border-color: #bdc3c7;
+  transition: all 0.2s ease;
+}
+
+  .actions-column .btn-outline-theme:hover {
+    color: #fff;
+    background-color: #1abc9c;
+    border-color: #1abc9c;
+  }
+
+/* Estilos para la tabla de detalles (lotes) dentro de la tarjeta */
+.card-body .table-theme thead th {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.card-body .table-theme tbody td {
+  padding: 0.75rem 1rem; /* Un poco menos de padding para la tabla secundaria */
+  font-size: 0.9rem;
+}
+/* ================================================================== */
+/* === ESTILOS PARA CONTROLES DE FILTRO (AÑADIDO) === */
+/* ================================================================== */
+
+.filter-controls {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.filter-control {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem; /* Bootstrap's default border-radius */
+  width: 100%;
+}
+
+  .filter-control::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .filter-control:focus {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: #1abc9c;
+    color: #fff;
+    box-shadow: 0 0 0 0.25rem rgba(26, 188, 156, 0.25);
+    outline: 0;
+  }
+
+/* Específico para el select para que la flecha se vea bien en tema oscuro */
+.filter-control {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px 12px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}

@@ -57,5 +57,18 @@ namespace FacturacionElectronica.Clients.Services
       var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
       return await _httpClient.PostAsync("api/lotes", httpContent);
     }
+    /// <summary>
+    /// Obtiene la lista de todos los productos, incluyendo sus lotes anidados, desde la API.
+    /// Este es el método que tu nueva vista de productos y lotes debe usar.
+    /// </summary>
+    public async Task<List<ProductWithLotesDto>> GetProductosConLotesAsync()
+    {
+      // Le indicamos al deserializador que la respuesta contiene una lista del DTO
+      // que incluye la propiedad "Lotes".
+      var response = await _httpClient.GetFromJsonAsync<ApiResponse<List<ProductWithLotesDto>>>("api/productos");
+
+      // Devuelve la lista de productos con sus lotes, o una lista vacía si no hay datos.
+      return response?.Data ?? new List<ProductWithLotesDto>();
+    }
   }
 }

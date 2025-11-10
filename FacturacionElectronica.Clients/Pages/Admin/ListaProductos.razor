@@ -1,16 +1,154 @@
 @page "/admin/productos"
 @layout AdminLayout
 
+@using FacturacionElectronica.Clients.DTOs
+@using FacturacionElectronica.Clients.Services
+@inject ProductoApiService ApiService
+@inject NavigationManager Navigation
+
+<!-- Reutilizamos tu clase .nav-card que ya tiene el efecto glassmorphism perfecto -->
 <div class="nav-card">
-    <h1 class="mb-4">
-        <span class="oi oi-list-rich" aria-hidden="true"></span>
-        Stock de Productos
-    </h1>
+    <div class="form-card-header">
+        <h3>
+            <span class="oi oi-list-rich"></span>
+            Stock de Productos y Lotes
+        </h3>
+    </div>
 
-    <p>
-        Aquí se mostrará la lista de todos los productos existentes en la base de datos.
-        Podrás ver detalles, editar y eliminar productos desde esta tabla.
-    </p>
+    <div class="p-4">
+        <p class="text-muted-white mb-4">
+            @if (selectedProduct == null)
+            {
+                <span>Haz clic en una fila para ver los detalles y lotes de un producto.</span>
+            }
+            else
+            {
+                <span>Viendo los detalles de <strong>@selectedProduct.Nombre</strong>.</span>
+            }
+        </p>
 
-    @* Próximamente: Aquí irá tu componente de tabla de productos. *@
+        @if (isLoading)
+        {
+            <p class="text-center"><em>Cargando lista de productos...</em></p>
+        }
+        else if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+        else
+        {
+            @if (selectedProduct == null)
+            {
+                <!-- VISTA 1: TABLA DE PRODUCTOS (Sin cambios) -->
+                <div class="table-responsive">
+                    <table class="table-theme">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Tipo (Categoría)</th>
+                                <th>Estado</th>
+                               
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var producto in allProducts)
+                            {
+                                <tr @onclick="() => SelectProduct(producto)" style="cursor: pointer;">
+                                    <td>@producto.Nombre</td>
+                                    <td>@producto.TipoProducto</td>
+                                    <td>
+                                        <span class="badge fs-6 @(producto.Activo ? "text-bg-success" : "text-bg-secondary")">
+                                            @(producto.Activo ? "Activo" : "Inactivo")
+                                        </span>
+                                    </td>
+                                    
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <!-- VISTA 2: DETALLE DEL PRODUCTO SELECCIONADO (AQUÍ ESTÁN LOS CAMBIOS) -->
+                <div class="card-body p-0">
+                    @if (selectedProduct.Lotes.Any())
+                    {
+                        <h5 class="mb-3">Lotes Registrados</h5>
+                        <div class="table-responsive">
+                            <table class="table-theme">
+                                <thead>
+                                    <tr>
+                                       
+                                        <th>Fecha Compra</th>
+                                        <th>Fecha Expiración</th>
+                                        <th>Costo Unit.</th>
+                                        <th>Precio Venta</th>
+                                        <th>Cant. Comprada</th>
+                                        <th>Cant. Disponible</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var lote in selectedProduct.Lotes)
+                                    {
+                                        <tr>
+                                            
+                                            <td>@lote.FechaCompra.ToString("yyyy-MM-dd")</td>
+                                            <td>@lote.FechaExpiracion?.ToString("yyyy-MM-dd")</td>
+                                            <td>@lote.CostoUnitario.ToString("C")</td>
+                                            <td>@lote.PrecioVentaUnitario.ToString("C")</td>
+                                            <td>@lote.CantidadComprada</td>
+                                            <td>@lote.CantidadDisponible</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center"><em>Este producto no tiene lotes registrados.</em></div>
+                    }
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" @onclick="CloseDetailsView">
+                        <span class="oi oi-check" aria-hidden="true"></span> Aceptar y Volver
+                    </button>
+                </div>
+            }
+        }
+    </div>
 </div>
+
+@code {
+    // El código C# no necesita cambios
+    private List<ProductWithLotesDto> allProducts = new();
+    private bool isLoading = true;
+    private string? errorMessage;
+    private ProductWithLotesDto? selectedProduct;
+
+    protected override async Task OnInitializedAsync() => await LoadProducts();
+
+    private async Task LoadProducts()
+    {
+        isLoading = true;
+        errorMessage = null;
+        try
+        {
+            allProducts = await ApiService.GetProductosConLotesAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar los productos: {ex.Message}.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void SelectProduct(ProductWithLotesDto product) => selectedProduct = product;
+    private void CloseDetailsView() => selectedProduct = null;
+    private void NavigateToAddLot() => Navigation.NavigateTo("/admin/productos/agregarlote");
+    private void NavigateToEditProduct(int productId) => Navigation.NavigateTo($"/admin/productos/editar/{productId}");
+}
