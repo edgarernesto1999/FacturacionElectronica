@@ -21,8 +21,10 @@ public class Program
     {
       BaseAddress = new Uri("https://localhost:7142")
     });
+
     builder.Services.AddScoped<ProductoApiService>();
     builder.Services.AddScoped<ToastService>();
+    builder.Services.AddScoped<UsuarioApiService>();
 
     // --- CONFIGURACIÓN DE AUTENTICACIÓN (NO SE TOCA) ---
     builder.Services.AddAuthorizationCore();

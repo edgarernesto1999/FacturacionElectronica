@@ -1,22 +1,275 @@
 @page "/admin/usuarios"
 @layout AdminLayout
 
-<div class="nav-card">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>
-            <span class="oi oi-people" aria-hidden="true"></span>
-            Gestión de Usuarios
-        </h1>
-        <button class="btn btn-primary">
-            <span class="oi oi-plus" aria-hidden="true"></span>
-            Agregar Nuevo Usuario
-        </button>
+@using FacturacionElectronica.Clients.DTOs
+@using FacturacionElectronica.Clients.Services
+@inject UsuarioApiService ApiService
+
+<!-- ================================================================== -->
+<!-- === LÓGICA DE RENDERIZADO PRINCIPAL === -->
+<!-- Si 'isCreatingUser' es true, muestra el formulario. Si no, muestra la tabla. -->
+<!-- ================================================================== -->
+@if (isCreatingUser)
+{
+    <!-- ================================================================== -->
+    <!-- === VISTA 1: FORMULARIO DE CREACIÓN (DISEÑO MEJORADO) === -->
+    <!-- ================================================================== -->
+    <div class="nav-card animate__animated animate__fadeIn">
+        <div class="form-card-header">
+            <h3>
+                <span class="oi oi-person"></span>
+                Crear Nuevo Usuario
+            </h3>
+            <p class="text-muted mb-0">Complete los datos para registrar un nuevo miembro del equipo.</p>
+        </div>
+
+        <div class="p-4">
+            <EditForm Model="@newUser" OnValidSubmit="@HandleCreateUser">
+                <DataAnnotationsValidator />
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger">@errorMessage</div>
+                }
+
+                <!-- SECCIÓN 1: INFORMACIÓN PERSONAL -->
+                <fieldset class="mb-4">
+                    <legend class="fs-5 border-bottom pb-2 mb-3">Información Personal</legend>
+                    <div class="row">
+                        <!-- Columna Izquierda: Nombre -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><span class="oi oi-person"></span></span>
+                                    <InputText id="nombre" @bind-Value="newUser.Nombre" class="form-control" placeholder="Ej: Juan" />
+                                </div>
+                                <ValidationMessage For="@(() => newUser.Nombre)" />
+                            </div>
+                        </div>
+                        <!-- Columna Derecha: Apellido -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="apellido" class="form-label">Apellido</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><span class="oi oi-person"></span></span>
+                                    <InputText id="apellido" @bind-Value="newUser.Apellido" class="form-control" placeholder="Ej: Pérez" />
+                                </div>
+                                <ValidationMessage For="@(() => newUser.Apellido)" />
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- SECCIÓN 2: CREDENCIALES Y PERMISOS -->
+                <fieldset>
+                    <legend class="fs-5 border-bottom pb-2 mb-3">Credenciales y Permisos</legend>
+                    <!-- Correo Electrónico -->
+                    <div class="mb-3">
+                        <label for="correo" class="form-label">Correo Electrónico</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><span class="oi oi-envelope-closed"></span></span>
+                            <InputText id="correo" @bind-Value="newUser.Correo" class="form-control" placeholder="usuario@ejemplo.com" />
+                        </div>
+                        <ValidationMessage For="@(() => newUser.Correo)" />
+                    </div>
+
+                    <div class="row">
+                        <!-- Columna Izquierda: Contraseña -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="contrasena" class="form-label">Contraseña</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><span class="oi oi-lock-locked"></span></span>
+                                    <InputText id="contrasena" @bind-Value="newUser.Contrasena" type="password" class="form-control" placeholder="Mínimo 8 caracteres" />
+                                </div>
+                                <ValidationMessage For="@(() => newUser.Contrasena)" />
+                            </div>
+                        </div>
+                        <!-- Columna Derecha: Rol -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="rol" class="form-label">Rol del Usuario</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><span class="oi oi-tag"></span></span>
+                                    <InputSelect id="rol" @bind-Value="newUser.Rol" class="form-select">
+                                        <option value="" disabled selected>Seleccione un rol</option>
+                                        <option value="admin">Administrador</option>
+                                        <option value="empleado">Empleado</option>
+                                    </InputSelect>
+                                </div>
+                                <ValidationMessage For="@(() => newUser.Rol)" />
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- SECCIÓN 3: BOTONES DE ACCIÓN -->
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <button type="button" class="btn btn-secondary" @onclick="CancelCreate">
+                        <span class="oi oi-x"></span> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success" disabled="@isSaving">
+                        <span class="oi oi-check"></span>
+                        @(isSaving ? "Guardando..." : "Confirmar y Guardar")
+                    </button>
+                </div>
+            </EditForm>
+        </div>
     </div>
+}
+else
+{
+    <!-- ================================================================== -->
+    <!-- === VISTA 2: TABLA DE USUARIOS EXISTENTES === -->
+    <!-- ================================================================== -->
+    <div class="nav-card">
+        <div class="form-card-header">
+            <h3>
+                <span class="oi oi-people"></span>
+                Gestión de Usuarios
+            </h3>
+        </div>
 
-    <p>
-        Desde aquí podrás ver la lista de todos los usuarios, crear nuevos perfiles
-        y cambiar su estado (por ejemplo, de 'Activo' a 'Inactivo').
-    </p>
+        <div class="p-4">
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="alert alert-success">@successMessage</div>
+            }
 
-    @* Próximamente: Aquí irá tu componente de tabla de usuarios con los botones de acción. *@
-</div>
+            @if (isLoading)
+            {
+                <p class="text-center"><em>Cargando usuarios...</em></p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table-theme">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Nombre Completo</th>
+                                <th>Correo Electrónico</th>
+                                <th>Rol</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in users)
+                            {
+                                <tr>
+                                    <td>@user.Id</td>
+                                    <td>@user.Nombre @user.Apellido</td>
+                                    <td>@user.Correo</td>
+                                    <td>@user.Rol</td>
+                                    <td>
+                                        <span class="badge fs-6 @(user.Estado == "activo" ? "text-bg-success" : "text-bg-secondary")">
+                                            @user.Estado.ToUpper()
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <hr />
+
+                <!-- BOTÓN PARA AGREGAR USUARIO AL FINAL DE LA TABLA -->
+                <div class="d-flex justify-content-end mt-3">
+                    <button class="btn btn-primary" @onclick="ShowCreateForm">
+                        <span class="oi oi-plus"></span> Agregar Nuevo Usuario
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+
+@code {
+    // --- ESTADO PARA LA TABLA ---
+    private List<UserDto> users = new();
+    private bool isLoading = true;
+
+    // --- ESTADO PARA EL FORMULARIO DE CREACIÓN ---
+    private bool isCreatingUser = false;
+    private bool isSaving = false;
+    private CreateUserDto newUser = new();
+
+    // --- ESTADO PARA MENSAJES ---
+    private string? errorMessage;
+    private string? successMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        isLoading = true;
+        errorMessage = null; // Limpia errores en cada carga
+        try
+        {
+            users = await ApiService.GetUsuariosAsync() ?? new List<UserDto>();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar los usuarios: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    // --- MÉTODOS PARA EL FLUJO DE CREACIÓN ---
+
+    private void ShowCreateForm()
+    {
+        isCreatingUser = true;
+        newUser = new CreateUserDto();
+        errorMessage = null;
+        successMessage = null;
+    }
+
+    private void CancelCreate()
+    {
+        isCreatingUser = false;
+        errorMessage = null;
+    }
+
+    private async Task HandleCreateUser()
+    {
+        isSaving = true;
+        errorMessage = null;
+        try
+        {
+            await ApiService.CreateUsuarioAsync(newUser);
+
+            // Prepara el mensaje de éxito y cambia a la vista de tabla
+            successMessage = $"¡Usuario '{newUser.Nombre} {newUser.Apellido}' creado con éxito!";
+            isCreatingUser = false;
+
+            // Recarga la lista para que el nuevo usuario aparezca inmediatamente
+            await LoadUsers();
+
+            // Tarea para limpiar el mensaje de éxito después de 5 segundos
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(5000);
+                successMessage = null;
+                await InvokeAsync(StateHasChanged);
+            });
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al crear el usuario: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+}

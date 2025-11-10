@@ -70,5 +70,31 @@ namespace FacturacionElectronica.Clients.Services
       // Devuelve la lista de productos con sus lotes, o una lista vacía si no hay datos.
       return response?.Data ?? new List<ProductWithLotesDto>();
     }
+    public class UsuarioApiService
+    {
+      private readonly HttpClient _httpClient;
+
+      public UsuarioApiService(HttpClient httpClient)
+      {
+        _httpClient = httpClient;
+      }
+
+      public async Task<List<UserDto>> GetUsuariosAsync()
+      {
+        return await _httpClient.GetFromJsonAsync<List<UserDto>>("api/usuarios") ?? new List<UserDto>();
+      }
+
+      public async Task CreateUsuarioAsync(CreateUserDto newUser)
+      {
+        var response = await _httpClient.PostAsJsonAsync("api/usuarios", newUser);
+        response.EnsureSuccessStatusCode();
+      }
+
+      public async Task UpdateUsuarioEstadoAsync(int userId, string nuevoEstado)
+      {
+        var response = await _httpClient.PutAsJsonAsync($"api/usuarios/{userId}/estado", new { Estado = nuevoEstado });
+        response.EnsureSuccessStatusCode();
+      }
+    }
   }
 }
