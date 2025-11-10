@@ -16,16 +16,105 @@
     </div>
 
     <div class="p-4">
-        <p class="text-muted-white mb-4">
-            @if (selectedProduct == null)
-            {
-                <span>Haz clic en una fila para ver los detalles y lotes de un producto.</span>
-            }
-            else
-            {
-                <span>Viendo los detalles de <strong>@selectedProduct.Nombre</strong>.</span>
-            }
-        </p>
+        @if (selectedProduct == null)
+        {
+            <!-- VISTA 1: TABLA DE PRODUCTOS Y FILTROS -->
+            <!-- SECCIÓN DE FILTROS (CORREGIDA) -->
+            <div class="filter-controls">
+                <!-- Filtro por Nombre -->
+                <div class="flex-grow-1">
+                    <!-- Se elimina @oninput y se usa @bind:event="oninput" para que se actualice mientras escribes -->
+                    <input type="text" class="filter-control" placeholder="Filtrar por nombre..."
+                           @bind="NameFilter" @bind:event="oninput" />
+                </div>
+                <!-- Filtro por Categoría -->
+                <div class="flex-grow-1">
+                    <!-- Se elimina el @onchange conflictivo -->
+                    <select class="filter-control" @bind="CategoryFilter">
+                        <option value="">Todas las categorías</option>
+                        @foreach (var category in uniqueCategories)
+                        {
+                            <option value="@category">@category</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table-theme">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Tipo (Categoría)</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var producto in filteredProducts)
+                        {
+                            <tr @onclick="() => SelectProduct(producto)" style="cursor: pointer;">
+                                <td>@producto.Nombre</td>
+                                <td>@producto.TipoProducto</td>
+                                <td>
+                                    <span class="badge fs-6 @(producto.Activo ? "text-bg-success" : "text-bg-secondary")">
+                                        @(producto.Activo ? "Activo" : "Inactivo")
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <!-- VISTA 2: DETALLE DEL PRODUCTO SELECCIONADO -->
+            <p class="text-muted-white mb-4">
+                Viendo los detalles de <strong>@selectedProduct.Nombre</strong>.
+            </p>
+            <div class="card-body p-0">
+                @if (selectedProduct.Lotes.Any())
+                {
+                    <h5 class="mb-3">Lotes Registrados</h5>
+                    <div class="table-responsive">
+                        <table class="table-theme">
+                            <thead>
+                                <tr>
+                                    <th>Fecha Compra</th>
+                                    <th>Fecha Expiración</th>
+                                    <th>Costo Unit.</th>
+                                    <th>Precio Venta</th>
+                                    <th>Cant. Comprada</th>
+                                    <th>Cant. Disponible</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var lote in selectedProduct.Lotes)
+                                {
+                                    <tr>
+                                        <td>@lote.FechaCompra.ToString("yyyy-MM-dd")</td>
+                                        <td>@lote.FechaExpiracion?.ToString("yyyy-MM-dd")</td>
+                                        <td>@lote.CostoUnitario.ToString("C")</td>
+                                        <td>@lote.PrecioVentaUnitario.ToString("C")</td>
+                                        <td>@lote.CantidadComprada</td>
+                                        <td>@lote.CantidadDisponible</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info text-center"><em>Este producto no tiene lotes registrados.</em></div>
+                }
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" @onclick="CloseDetailsView">
+                    <span class="oi oi-check" aria-hidden="true"></span> Aceptar y Volver
+                </button>
+            </div>
+        }
 
         @if (isLoading)
         {
@@ -35,97 +124,46 @@
         {
             <div class="alert alert-danger">@errorMessage</div>
         }
-        else
-        {
-            @if (selectedProduct == null)
-            {
-                <!-- VISTA 1: TABLA DE PRODUCTOS (Sin cambios) -->
-                <div class="table-responsive">
-                    <table class="table-theme">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Tipo (Categoría)</th>
-                                <th>Estado</th>
-                               
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var producto in allProducts)
-                            {
-                                <tr @onclick="() => SelectProduct(producto)" style="cursor: pointer;">
-                                    <td>@producto.Nombre</td>
-                                    <td>@producto.TipoProducto</td>
-                                    <td>
-                                        <span class="badge fs-6 @(producto.Activo ? "text-bg-success" : "text-bg-secondary")">
-                                            @(producto.Activo ? "Activo" : "Inactivo")
-                                        </span>
-                                    </td>
-                                    
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-            else
-            {
-                <!-- VISTA 2: DETALLE DEL PRODUCTO SELECCIONADO (AQUÍ ESTÁN LOS CAMBIOS) -->
-                <div class="card-body p-0">
-                    @if (selectedProduct.Lotes.Any())
-                    {
-                        <h5 class="mb-3">Lotes Registrados</h5>
-                        <div class="table-responsive">
-                            <table class="table-theme">
-                                <thead>
-                                    <tr>
-                                       
-                                        <th>Fecha Compra</th>
-                                        <th>Fecha Expiración</th>
-                                        <th>Costo Unit.</th>
-                                        <th>Precio Venta</th>
-                                        <th>Cant. Comprada</th>
-                                        <th>Cant. Disponible</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var lote in selectedProduct.Lotes)
-                                    {
-                                        <tr>
-                                            
-                                            <td>@lote.FechaCompra.ToString("yyyy-MM-dd")</td>
-                                            <td>@lote.FechaExpiracion?.ToString("yyyy-MM-dd")</td>
-                                            <td>@lote.CostoUnitario.ToString("C")</td>
-                                            <td>@lote.PrecioVentaUnitario.ToString("C")</td>
-                                            <td>@lote.CantidadComprada</td>
-                                            <td>@lote.CantidadDisponible</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="alert alert-info text-center"><em>Este producto no tiene lotes registrados.</em></div>
-                    }
-                </div>
-                <div class="form-actions">
-                    <button class="btn btn-primary" @onclick="CloseDetailsView">
-                        <span class="oi oi-check" aria-hidden="true"></span> Aceptar y Volver
-                    </button>
-                </div>
-            }
-        }
     </div>
 </div>
 
 @code {
-    // El código C# no necesita cambios
     private List<ProductWithLotesDto> allProducts = new();
+    private List<ProductWithLotesDto> filteredProducts = new();
+    private List<string> uniqueCategories = new();
     private bool isLoading = true;
     private string? errorMessage;
     private ProductWithLotesDto? selectedProduct;
+
+    // ==================================================
+    // === CAMBIOS EN LA LÓGICA DE FILTRADO ===
+    // ==================================================
+
+    // 1. Se crea un "backing field" para el filtro de nombre
+    private string _nameFilter = string.Empty;
+    // 2. Se convierte en una propiedad. El @bind ahora apunta a "NameFilter"
+    private string NameFilter
+    {
+        get => _nameFilter;
+        set
+        {
+            _nameFilter = value;
+            ApplyFilters(); // Se llama al método de filtrado automáticamente
+        }
+    }
+
+    // 3. Se crea un "backing field" para el filtro de categoría
+    private string _categoryFilter = string.Empty;
+    // 4. Se convierte en una propiedad. El @bind ahora apunta a "CategoryFilter"
+    private string CategoryFilter
+    {
+        get => _categoryFilter;
+        set
+        {
+            _categoryFilter = value;
+            ApplyFilters(); // Se llama al método de filtrado automáticamente
+        }
+    }
 
     protected override async Task OnInitializedAsync() => await LoadProducts();
 
@@ -136,6 +174,8 @@
         try
         {
             allProducts = await ApiService.GetProductosConLotesAsync();
+            uniqueCategories = allProducts.Select(p => p.TipoProducto).Distinct().OrderBy(c => c).ToList();
+            ApplyFilters();
         }
         catch (Exception ex)
         {
@@ -147,8 +187,24 @@
         }
     }
 
+    private void ApplyFilters()
+    {
+        var query = allProducts.AsEnumerable();
+
+        // La lógica ahora usa las propiedades privadas (_nameFilter, _categoryFilter)
+        if (!string.IsNullOrWhiteSpace(_nameFilter))
+        {
+            query = query.Where(p => p.Nombre.Contains(_nameFilter, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(_categoryFilter))
+        {
+            query = query.Where(p => p.TipoProducto == _categoryFilter);
+        }
+
+        filteredProducts = query.ToList();
+    }
+
     private void SelectProduct(ProductWithLotesDto product) => selectedProduct = product;
     private void CloseDetailsView() => selectedProduct = null;
-    private void NavigateToAddLot() => Navigation.NavigateTo("/admin/productos/agregarlote");
-    private void NavigateToEditProduct(int productId) => Navigation.NavigateTo($"/admin/productos/editar/{productId}");
 }
