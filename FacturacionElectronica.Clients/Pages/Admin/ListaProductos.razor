@@ -23,13 +23,11 @@
             <div class="filter-controls">
                 <!-- Filtro por Nombre -->
                 <div class="flex-grow-1">
-                    <!-- Se elimina @oninput y se usa @bind:event="oninput" para que se actualice mientras escribes -->
                     <input type="text" class="filter-control" placeholder="Filtrar por nombre..."
                            @bind="NameFilter" @bind:event="oninput" />
                 </div>
                 <!-- Filtro por Categoría -->
                 <div class="flex-grow-1">
-                    <!-- Se elimina el @onchange conflictivo -->
                     <select class="filter-control" @bind="CategoryFilter">
                         <option value="">Todas las categorías</option>
                         @foreach (var category in uniqueCategories)
@@ -46,18 +44,31 @@
                         <tr>
                             <th>Nombre</th>
                             <th>Tipo (Categoría)</th>
-                            <th>Estado</th>
+                            <th>Stock Disponible</th>  <!-- CAMBIO 1: Encabezado de la tabla -->
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var producto in filteredProducts)
                         {
+                            // Lógica para calcular el stock y determinar el color del badge
+                            var totalStock = producto.Lotes.Sum(lote => lote.CantidadDisponible);
+                            var stockBadgeClass = "text-bg-success"; // Verde por defecto
+                            if (totalStock == 0)
+                            {
+                                stockBadgeClass = "text-bg-danger"; // Rojo si no hay stock
+                            }
+                            else if (totalStock <= 10)
+                            {
+                                stockBadgeClass = "text-bg-warning"; // Amarillo si el stock es bajo
+                            }
+
                             <tr @onclick="() => SelectProduct(producto)" style="cursor: pointer;">
                                 <td>@producto.Nombre</td>
                                 <td>@producto.TipoProducto</td>
                                 <td>
-                                    <span class="badge fs-6 @(producto.Activo ? "text-bg-success" : "text-bg-secondary")">
-                                        @(producto.Activo ? "Activo" : "Inactivo")
+                                    <!-- CAMBIO 2: Se muestra el stock total con su badge de color -->
+                                    <span class="badge fs-6 @stockBadgeClass">
+                                        @totalStock
                                     </span>
                                 </td>
                             </tr>
@@ -68,7 +79,7 @@
         }
         else
         {
-            <!-- VISTA 2: DETALLE DEL PRODUCTO SELECCIONADO -->
+            <!-- VISTA 2: DETALLE DEL PRODUCTO SELECCIONADO (Sin cambios aquí) -->
             <p class="text-muted-white mb-4">
                 Viendo los detalles de <strong>@selectedProduct.Nombre</strong>.
             </p>
@@ -128,6 +139,8 @@
 </div>
 
 @code {
+    // El código C# no necesita cambios, ya que el DTO `ProductWithLotesDto`
+    // ya contiene la información de los lotes necesaria para el cálculo.
     private List<ProductWithLotesDto> allProducts = new();
     private List<ProductWithLotesDto> filteredProducts = new();
     private List<string> uniqueCategories = new();
@@ -135,33 +148,25 @@
     private string? errorMessage;
     private ProductWithLotesDto? selectedProduct;
 
-    // ==================================================
-    // === CAMBIOS EN LA LÓGICA DE FILTRADO ===
-    // ==================================================
-
-    // 1. Se crea un "backing field" para el filtro de nombre
     private string _nameFilter = string.Empty;
-    // 2. Se convierte en una propiedad. El @bind ahora apunta a "NameFilter"
     private string NameFilter
     {
         get => _nameFilter;
         set
         {
             _nameFilter = value;
-            ApplyFilters(); // Se llama al método de filtrado automáticamente
+            ApplyFilters();
         }
     }
 
-    // 3. Se crea un "backing field" para el filtro de categoría
     private string _categoryFilter = string.Empty;
-    // 4. Se convierte en una propiedad. El @bind ahora apunta a "CategoryFilter"
     private string CategoryFilter
     {
         get => _categoryFilter;
         set
         {
             _categoryFilter = value;
-            ApplyFilters(); // Se llama al método de filtrado automáticamente
+            ApplyFilters();
         }
     }
 
@@ -191,7 +196,6 @@
     {
         var query = allProducts.AsEnumerable();
 
-        // La lógica ahora usa las propiedades privadas (_nameFilter, _categoryFilter)
         if (!string.IsNullOrWhiteSpace(_nameFilter))
         {
             query = query.Where(p => p.Nombre.Contains(_nameFilter, StringComparison.OrdinalIgnoreCase));

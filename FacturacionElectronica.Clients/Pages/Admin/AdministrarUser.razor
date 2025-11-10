@@ -7,12 +7,11 @@
 
 <!-- ================================================================== -->
 <!-- === LÓGICA DE RENDERIZADO PRINCIPAL === -->
-<!-- Si 'isCreatingUser' es true, muestra el formulario. Si no, muestra la tabla. -->
 <!-- ================================================================== -->
 @if (isCreatingUser)
 {
     <!-- ================================================================== -->
-    <!-- === VISTA 1: FORMULARIO DE CREACIÓN (DISEÑO MEJORADO) === -->
+    <!-- === VISTA 1: FORMULARIO DE CREACIÓN === -->
     <!-- ================================================================== -->
     <div class="nav-card animate__animated animate__fadeIn">
         <div class="form-card-header">
@@ -36,7 +35,6 @@
                 <fieldset class="mb-4">
                     <legend class="fs-5 border-bottom pb-2 mb-3">Información Personal</legend>
                     <div class="row">
-                        <!-- Columna Izquierda: Nombre -->
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="nombre" class="form-label">Nombre</label>
@@ -47,7 +45,6 @@
                                 <ValidationMessage For="@(() => newUser.Nombre)" />
                             </div>
                         </div>
-                        <!-- Columna Derecha: Apellido -->
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="apellido" class="form-label">Apellido</label>
@@ -64,7 +61,6 @@
                 <!-- SECCIÓN 2: CREDENCIALES Y PERMISOS -->
                 <fieldset>
                     <legend class="fs-5 border-bottom pb-2 mb-3">Credenciales y Permisos</legend>
-                    <!-- Correo Electrónico -->
                     <div class="mb-3">
                         <label for="correo" class="form-label">Correo Electrónico</label>
                         <div class="input-group">
@@ -75,7 +71,6 @@
                     </div>
 
                     <div class="row">
-                        <!-- Columna Izquierda: Contraseña -->
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="contrasena" class="form-label">Contraseña</label>
@@ -86,7 +81,6 @@
                                 <ValidationMessage For="@(() => newUser.Contrasena)" />
                             </div>
                         </div>
-                        <!-- Columna Derecha: Rol -->
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="rol" class="form-label">Rol del Usuario</label>
@@ -136,6 +130,10 @@ else
             {
                 <div class="alert alert-success">@successMessage</div>
             }
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger">@errorMessage</div>
+            }
 
             @if (isLoading)
             {
@@ -163,9 +161,11 @@ else
                                     <td>@user.Correo</td>
                                     <td>@user.Rol</td>
                                     <td>
-                                        <span class="badge fs-6 @(user.Estado == "activo" ? "text-bg-success" : "text-bg-secondary")">
-                                            @user.Estado.ToUpper()
-                                        </span>
+                                        <select class="form-select form-select-sm status-select @(user.Estado == "activo" ? "status-active" : "status-inactive")"
+                                                @onchange="(e) => HandleStatusChange(user, e)">
+                                            <option value="activo" selected="@(user.Estado == "activo")">Activo</option>
+                                            <option value="inactivo" selected="@(user.Estado == "inactivo")">Inactivo</option>
+                                        </select>
                                     </td>
                                 </tr>
                             }
@@ -175,7 +175,6 @@ else
 
                 <hr />
 
-                <!-- BOTÓN PARA AGREGAR USUARIO AL FINAL DE LA TABLA -->
                 <div class="d-flex justify-content-end mt-3">
                     <button class="btn btn-primary" @onclick="ShowCreateForm">
                         <span class="oi oi-plus"></span> Agregar Nuevo Usuario
@@ -209,7 +208,7 @@ else
     private async Task LoadUsers()
     {
         isLoading = true;
-        errorMessage = null; // Limpia errores en cada carga
+        errorMessage = null;
         try
         {
             users = await ApiService.GetUsuariosAsync() ?? new List<UserDto>();
@@ -224,12 +223,10 @@ else
         }
     }
 
-    // --- MÉTODOS PARA EL FLUJO DE CREACIÓN ---
-
     private void ShowCreateForm()
     {
         isCreatingUser = true;
-        newUser = new CreateUserDto();
+        newUser = new();
         errorMessage = null;
         successMessage = null;
     }
@@ -237,31 +234,20 @@ else
     private void CancelCreate()
     {
         isCreatingUser = false;
-        errorMessage = null;
     }
 
     private async Task HandleCreateUser()
     {
         isSaving = true;
         errorMessage = null;
+        successMessage = null;
+
         try
         {
-            await ApiService.CreateUsuarioAsync(newUser);
-
-            // Prepara el mensaje de éxito y cambia a la vista de tabla
-            successMessage = $"¡Usuario '{newUser.Nombre} {newUser.Apellido}' creado con éxito!";
+            var createdUser = await ApiService.CreateUserAsync(newUser);
+            successMessage = $"Usuario '{createdUser.Nombre}' creado con éxito.";
             isCreatingUser = false;
-
-            // Recarga la lista para que el nuevo usuario aparezca inmediatamente
             await LoadUsers();
-
-            // Tarea para limpiar el mensaje de éxito después de 5 segundos
-            _ = Task.Run(async () =>
-            {
-                await Task.Delay(5000);
-                successMessage = null;
-                await InvokeAsync(StateHasChanged);
-            });
         }
         catch (Exception ex)
         {
@@ -272,4 +258,60 @@ else
             isSaving = false;
         }
     }
+
+    private async Task HandleStatusChange(UserDto user, ChangeEventArgs e)
+    {
+        var newStatus = e.Value?.ToString();
+        if (user == null || string.IsNullOrEmpty(newStatus))
+        {
+            return;
+        }
+
+        var originalStatus = user.Estado;
+        user.Estado = newStatus;
+
+        successMessage = null;
+        errorMessage = null;
+
+        try
+        {
+            var updateDto = new UpdateUserStatusDto { Estado = newStatus };
+            await ApiService.UpdateUserStatusAsync(user.Id, updateDto);
+            successMessage = $"El estado de {user.Nombre} se actualizó a '{newStatus}'.";
+        }
+        catch (Exception ex)
+        {
+            user.Estado = originalStatus;
+            errorMessage = $"Error al actualizar el estado para {user.Nombre}: {ex.Message}";
+        }
+
+        StateHasChanged();
+    }
 }
+
+<!-- ================================================================== -->
+<!-- === CSS PARA ESTILIZAR EL SELECT DE ESTADO === -->
+<!-- ================================================================== -->
+<style>
+    .status-select {
+        border-radius: 1rem;
+        border-width: 2px;
+        font-weight: 600;
+        padding: 0.25rem 0.5rem;
+        width: auto;
+        min-width: 100px;
+        text-align: center;
+    }
+
+    .status-active {
+        background-color: rgba(26, 188, 156, 0.2);
+        border-color: #1abc9c;
+        color: #1abc9c;
+    }
+
+    .status-inactive {
+        background-color: rgba(108, 117, 125, 0.2);
+        border-color: #6c757d;
+        color: #6c757d;
+    }
+</style>

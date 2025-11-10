@@ -1,6 +1,15 @@
-/ /* ================================================================== */
+/* ================================================================== */
 /* === ESTILOS DEFINITIVOS PARA EL PANEL DE ADMINISTRACIÓN (v2) === */
 /* ================================================================== */
+
+/* --- CAMBIO 1: Arreglar el fondo blanco de la página --- */
+/* Se establece un color de fondo base para todo el body */
+body {
+  margin: 0;
+  background-color: #0f2027; /* Color más oscuro del gradiente */
+  font-family: sans-serif; /* Buena práctica añadir una fuente base */
+}
+
 /* --- 1. Contenedor Principal del Layout --- */
 .admin-layout {
   display: flex;
@@ -151,6 +160,10 @@
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   color: #fff;
   overflow: hidden;
+  /* --- CAMBIO 2: Reducir y centrar el ancho de la tarjeta --- */
+  max-width: 1200px; /* Ancho máximo para que no se estire demasiado */
+  margin-left: auto; /* Centrado horizontal automático */
+  margin-right: auto; /* Centrado horizontal automático */
 }
 
 .form-card-header {
@@ -335,3 +348,11 @@
   -moz-appearance: none;
   appearance: none;
 }
+
+  /* ================================================= */
+  /* === NUEVA REGLA AÑADIDA PARA ARREGLAR EL TEXTO === */
+  /* ================================================= */
+  .filter-control option {
+    background-color: white;
+    color: #212529; /* Un color de texto oscuro para el contraste */
+  }

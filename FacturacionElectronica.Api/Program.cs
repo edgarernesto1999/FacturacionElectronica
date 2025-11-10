@@ -415,6 +415,8 @@ app.MapGet("/api/usuarios", async (AppDbContext db) =>
 
   return Results.Ok(new { total = data.Count, data });
 });
+
+
 //.RequireAuthorization("admin");
 
 app.Run();
