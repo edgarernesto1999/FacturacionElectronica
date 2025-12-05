@@ -55,7 +55,13 @@ namespace FacturacionElectronica.Clients.DTOs
         [JsonPropertyName("nombre")] // <-- CORRECCIÓN
         public string Nombre { get; set; }
 
-        [JsonPropertyName("activo")] // <-- CORRECCIÓN
+        [JsonPropertyName("marca")] // <-- CORRECCIÓN
+        public string Marca { get; set; }
+
+        [JsonPropertyName("presentacion")] // <-- CORRECCIÓN
+        public string Presentacion { get; set; }
+
+    [JsonPropertyName("activo")] // <-- CORRECCIÓN
         public bool Activo { get; set; }
 
         [JsonPropertyName("lotes")] // <-- CORRECCIÓN

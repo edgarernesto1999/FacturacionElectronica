@@ -1,22 +1,25 @@
 /* ================================================================== */
-/* === ESTILOS DEFINITIVOS PARA EL PANEL DE ADMINISTRACIÓN (v2) === */
+/* === ESTILOS DEFINITIVOS PARA EL PANEL DE ADMINISTRACIÓN (Tema Blanco + Sidebar Oscuro) === */
 /* ================================================================== */
 
-/* --- CAMBIO 1: Arreglar el fondo blanco de la página --- */
-/* Se establece un color de fondo base para todo el body */
+/* --- FONDO GLOBAL CLARO --- */
 body {
   margin: 0;
-  background-color: #0f2027; /* Color más oscuro del gradiente */
-  font-family: sans-serif; /* Buena práctica añadir una fuente base */
+  background-color: #f5f6fa; /* blanco suave */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #111827;
 }
 
-/* --- 1. Contenedor Principal del Layout --- */
+/* --- CONTENEDOR PRINCIPAL --- */
 .admin-layout {
   display: flex;
   min-height: 100vh;
 }
 
-/* --- 2. Barra Lateral de Navegación (Sidebar) --- */
+/* ================================================================== */
+/* === SIDEBAR (SE MANTIENE OSCURO COMO EN LA IMAGEN) === */
+/* ================================================================== */
+
 .sidebar {
   width: 250px;
   position: fixed;
@@ -24,98 +27,13 @@ body {
   left: 0;
   height: 100%;
   z-index: 1000;
-  background-color: #2c3e50;
+  background-color: #2c3e50; /* Color oscuro del menú */
   color: #fff;
   display: flex;
   flex-direction: column;
-  box-shadow: 3px 0px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 3px 0px 15px rgba(0, 0, 0, 0.12);
 }
 
-/* --- 3. Área de Contenido Principal --- */
-.main-content {
-  margin-left: 250px;
-  width: 100%;
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(180deg, #0f2027, #203a43, #2c5364);
-}
-
-/* --- 4. Fondo Animado (Contenido DENTRO de .main-content) --- */
-.admin-background-shapes {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-}
-
-/* --- 5. Contenido de la Página (Wrapper para @Body) --- */
-.page-content-wrapper {
-  position: relative;
-  z-index: 2;
-  padding: 2rem;
-  color: #fff;
-  height: 100%;
-  overflow-y: auto;
-}
-
-
-/* ================================================================== */
-/* === ESTILOS DE LAS FORMAS Y COMPONENTES === */
-/* ================================================================== */
-
-/* Estilos de las formas */
-.shape {
-  position: absolute;
-  border-radius: 50%;
-  background: linear-gradient(45deg, #1ddde8, #22a7f0, #9b59b6);
-  opacity: 0.25;
-}
-
-.shape-1 {
-  width: 150px;
-  height: 150px;
-  top: 10%;
-  left: 15%;
-}
-
-.shape-2 {
-  width: 80px;
-  height: 80px;
-  top: 25%;
-  left: 80%;
-}
-
-.shape-3 {
-  width: 200px;
-  height: 200px;
-  top: 70%;
-  left: 10%;
-}
-
-.shape-4 {
-  width: 50px;
-  height: 50px;
-  top: 80%;
-  left: 60%;
-}
-
-.shape-5 {
-  width: 120px;
-  height: 120px;
-  top: 40%;
-  left: 40%;
-}
-
-.shape-6 {
-  width: 100px;
-  height: 100px;
-  top: 5%;
-  left: 50%;
-}
-
-/* Estilos del Header y Enlaces del Sidebar */
 .sidebar-header {
   padding: 1.5rem;
   font-size: 1.5rem;
@@ -125,14 +43,51 @@ body {
   border-bottom: 1px solid #34495e;
 }
 
+.nav-section-header {
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #ecf0f1;
+  opacity: .8;
+  text-transform: uppercase;
+  margin-top: 1rem;
+}
+
 .sidebar .nav-link {
   color: #bdc3c7;
-  padding: 1rem 1.5rem;
+  padding: 0.9rem 1.5rem;
   display: flex;
   align-items: center;
   text-decoration: none;
   transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
+/* Encabezado clicable de cada sección (Productos, Clientes, Sistema) */
+.nav-section-toggle {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #ecf0f1;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+}
+
+  /* Hover suave para el header */
+  .nav-section-toggle:hover {
+    background-color: #34495e;
+  }
+
+  /* Icono de chevron un poquito más pequeño */
+  .nav-section-toggle .oi {
+    font-size: 0.9rem;
+  }
+
 
   .sidebar .nav-link:hover {
     background-color: #34495e;
@@ -151,208 +106,555 @@ body {
     width: 20px;
   }
 
-/* Estilos de las tarjetas y formularios (Glassmorphism) */
-.form-card, .nav-card {
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+/* ================================================================== */
+/* === CONTENIDO PRINCIPAL (BLANCO) === */
+/* ================================================================== */
+
+.main-content {
+  margin-left: 250px;
+  width: 100%;
+  background-color: #f5f6fa !important; /* Fondo claro */
+  padding: 2rem;
+  overflow-y: auto;
+  position: relative;
+}
+
+.page-content-wrapper {
+  background-color: transparent;
+  color: #111827;
+}
+
+/* ================================================================== */
+/* === TARJETAS, FORMULARIOS Y COMPONENTES (BLANCOS) === */
+/* ================================================================== */
+
+.form-card,
+.nav-card,
+.cliente-detalle-card {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #e5e7eb;
   border-radius: 15px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  color: #fff;
-  overflow: hidden;
-  /* --- CAMBIO 2: Reducir y centrar el ancho de la tarjeta --- */
-  max-width: 1200px; /* Ancho máximo para que no se estire demasiado */
-  margin-left: auto; /* Centrado horizontal automático */
-  margin-right: auto; /* Centrado horizontal automático */
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  padding: 1.75rem;
 }
 
 .form-card-header {
-  padding: 1.5rem;
-  background: rgba(0, 0, 0, 0.2);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1.2rem;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #111827;
 }
 
   .form-card-header h3 {
     margin: 0;
-    font-weight: 600;
     display: flex;
     align-items: center;
   }
 
   .form-card-header .oi {
     margin-right: 12px;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
 
-.form-card-body {
-  padding: 2rem;
-}
-
-.form-card .form-control {
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #fff;
+/* INPUTS */
+.form-control {
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #111827;
   padding: 0.75rem 1rem;
 }
 
-  .form-card .form-control::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+  .form-control::placeholder {
+    color: #9ca3af;
   }
 
-  .form-card .form-control:focus {
-    background-color: rgba(255, 255, 255, 0.2);
-    border-color: #1abc9c;
-    color: #fff;
-    box-shadow: 0 0 0 0.25rem rgba(26, 188, 156, 0.25);
+  .form-control:focus {
+    border-color: #0066ff;
+    box-shadow: 0 0 0 0.15rem rgba(0, 102, 255, 0.25);
+    background-color: #fff;
+    color: #111827;
   }
 
-.form-card .form-check-input {
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-  .form-card .form-check-input:checked {
-    background-color: #1abc9c;
-    border-color: #1abc9c;
-  }
-
-.form-card .text-muted-white {
-  color: rgba(255, 255, 255, 0.7) !important;
-}
-
-.form-card .validation-message {
-  color: #ffc107;
-}
-
+/* ACTIONS */
 .form-actions {
   display: flex;
-  justify-content: flex-end;
   gap: 1rem;
-  margin-top: 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  padding-top: 1.5rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e5e7eb;
 }
 
-  .form-actions .btn {
-    min-width: 150px;
-    font-weight: 600;
-  }
-
 /* ================================================================== */
-/* === ESTILOS DE TABLA TEMÁTICOS (NUEVOS Y CORREGIDOS) === */
+/* === TABLAS (BLANCAS) === */
 /* ================================================================== */
 
-/* Tabla principal con estética de vidrio y espaciado */
 .table-theme {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  color: #ecf0f1; /* Blanco suave para mejor lectura */
+  color: #111827;
+  background-color: #ffffff;
 }
 
-  /* Cabecera de la tabla */
   .table-theme thead th {
     padding: 1rem 1.5rem;
     text-align: left;
     font-weight: 600;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    /* Fondo ligeramente más opaco y borde para definir */
-    background-color: rgba(0, 0, 0, 0.2);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    letter-spacing: 0.04em;
+    background-color: #f3f4f6;
+    border-bottom: 1px solid #e5e7eb;
   }
 
-  /* Celdas del cuerpo de la tabla */
   .table-theme tbody td {
-    padding: 1.25rem 1.5rem; /* Celdas altas para sensación de amplitud */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Línea divisoria sutil */
-    vertical-align: middle;
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
   }
 
-  /* Eliminar el borde de la última fila para un look limpio */
   .table-theme tbody tr:last-child td {
     border-bottom: none;
   }
 
-  /* Efecto hover que "ilumina" la fila con el color de acento */
   .table-theme tbody tr:hover {
-    background-color: rgba(26, 188, 156, 0.15); /* #1abc9c con transparencia */
+    background-color: #e5f6ff;
   }
 
-  /* Columna de acciones centrada */
-  .table-theme .actions-column {
-    text-align: center;
-  }
-
-/* Botones que combinan con el tema oscuro */
-.actions-column .btn-outline-theme {
-  color: #bdc3c7;
-  border-color: #bdc3c7;
-  transition: all 0.2s ease;
-}
-
-  .actions-column .btn-outline-theme:hover {
-    color: #fff;
-    background-color: #1abc9c;
-    border-color: #1abc9c;
-  }
-
-/* Estilos para la tabla de detalles (lotes) dentro de la tarjeta */
-.card-body .table-theme thead th {
-  background-color: rgba(0, 0, 0, 0.3);
-}
-
-.card-body .table-theme tbody td {
-  padding: 0.75rem 1rem; /* Un poco menos de padding para la tabla secundaria */
-  font-size: 0.9rem;
-}
 /* ================================================================== */
-/* === ESTILOS PARA CONTROLES DE FILTRO (AÑADIDO) === */
+/* === FILTROS (BLANCOS) === */
 /* ================================================================== */
 
 .filter-controls {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
 .filter-control {
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #fff;
-  padding: 0.75rem 1rem;
-  border-radius: 0.375rem; /* Bootstrap's default border-radius */
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #111827;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
   width: 100%;
 }
 
   .filter-control::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: #9ca3af;
   }
 
   .filter-control:focus {
-    background-color: rgba(255, 255, 255, 0.2);
     border-color: #1abc9c;
-    color: #fff;
-    box-shadow: 0 0 0 0.25rem rgba(26, 188, 156, 0.25);
-    outline: 0;
+    box-shadow: 0 0 0 0.15rem rgba(26, 188, 156, 0.25);
+    outline: none;
+    background-color: #ffffff;
   }
 
-/* Específico para el select para que la flecha se vea bien en tema oscuro */
-.filter-control {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 16px 12px;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
+  .filter-control option {
+    background-color: #ffffff;
+    color: #111827;
+  }
+
+/* ================================================================== */
+/* === RESPONSIVE === */
+/* ================================================================== */
+
+@media (max-width: 768px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    position: relative;
+    height: auto;
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+}
+/* 👇 FORZAR FONDO BLANCO EN EL ÁREA DE TRABAJO */
+.main-content {
+  background-color: #ffffff !important;
 }
 
-  /* ================================================= */
-  /* === NUEVA REGLA AÑADIDA PARA ARREGLAR EL TEXTO === */
-  /* ================================================= */
-  .filter-control option {
-    background-color: white;
-    color: #212529; /* Un color de texto oscuro para el contraste */
+.page-content-wrapper {
+  background-color: #ffffff !important;
+  color: #111827 !important; /* texto oscuro */
+}
+
+/* 👇 Opcional: ocultar shapes/figuras para que no manchen el fondo blanco */
+.admin-background-shapes,
+.admin-background-shapes .shape {
+  display: none !important;
+}
+/* =============== 🎨 ESTILO MEJORADO PARA TABLA Y FILTROS =============== */
+
+/* Contenedor de filtros */
+.filter-controls {
+  display: flex;
+  gap: 1.2rem;
+  margin-bottom: 1.3rem;
+}
+
+  .filter-controls input {
+    border: 1px solid #cfd8dc;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
   }
+
+    .filter-controls input:focus {
+      border-color: #00a8ff;
+      box-shadow: 0 0 0 3px rgba(0,168,255,0.18);
+    }
+
+/* =============== 📌 TABLA MEJORADA =============== */
+.table-theme {
+  border-radius: 15px;
+  overflow: hidden;
+  border: 1px solid #e1e5eb;
+}
+
+  .table-theme thead th {
+    background: linear-gradient(90deg, #00a8ff, #0097e6);
+    color: white !important;
+    font-size: 0.85rem;
+    padding: 1rem;
+    border-bottom: none;
+  }
+
+  .table-theme tbody tr {
+    transition: all 0.2s ease-in-out;
+  }
+
+    .table-theme tbody tr:hover {
+      background-color: #e1f5fe;
+      cursor: pointer;
+    }
+
+  .table-theme tbody td {
+    padding: 1rem 1.5rem;
+    font-size: 0.93rem;
+    color: #374151;
+    border-bottom: 1px solid #eef2f7;
+  }
+
+  /* Botón Editar */
+  .table-theme .btn-info {
+    background-color: #0097e6;
+    border: none;
+    color: #fff;
+    padding: 0.45rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background 0.25s ease, transform 0.15s ease;
+  }
+
+    .table-theme .btn-info:hover {
+      background-color: #007bb3;
+      transform: scale(1.05);
+    }
+
+/* =============== 🟦 BOTÓN PRINCIPAL “Agregar Cliente” =============== */
+.btn-primary {
+  background: linear-gradient(90deg, #4b7bec, #3867d6);
+  border: none;
+  padding: 0.65rem 1.25rem;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+  .btn-primary:hover {
+    background: linear-gradient(90deg, #3867d6, #274b9f);
+    transform: scale(1.03);
+  }
+
+/* 🟢 Botones de guardar */
+.btn-success {
+  background: linear-gradient(90deg, #20bf6b, #0fb369);
+  border: none;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+  .btn-success:hover {
+    background: linear-gradient(90deg, #16a058, #0b874d);
+    transform: scale(1.03);
+  }
+
+/* 🔘 Botón cancelar */
+.btn-secondary {
+  border-radius: 10px;
+  font-weight: 600;
+  background-color: #c3cbd6;
+  color: #2d3642;
+}
+
+  .btn-secondary:hover {
+    background-color: #b1bbc7;
+    transform: scale(1.03);
+  }
+
+/* ================== ❗️ CARDS MÁS BONITAS ================== */
+.nav-card, .form-card {
+  border-radius: 18px;
+  border: 1px solid #e3e9ef;
+  box-shadow: 0 3px 10px rgba(119, 136, 153, 0.15);
+}
+
+.form-card-header {
+  border-radius: 18px 18px 0 0;
+  background: #f4f7fb;
+}
+/* ==================== FORMULARIOS DE CREAR / EDITAR TIPO TARJETA ==================== */
+
+.cliente-form-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 1rem;
+}
+
+.cliente-form-card {
+  width: 420px;
+  max-width: 100%;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+  border: 1px solid #e5e7eb;
+  padding: 1.5rem 1.5rem 1.7rem 1.5rem;
+}
+
+/* Cabecera con colores que combinan con la tabla (azules) */
+.cliente-form-card-header.colored-header {
+  margin: -1.5rem -1.5rem 1.25rem -1.5rem;
+  padding: 1.1rem 1.5rem;
+  border-radius: 16px 16px 0 0;
+  background: linear-gradient(90deg, #00a8ff, #0097e6);
+  color: #ffffff;
+}
+
+.cliente-form-card-header h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.cliente-form-card-header p {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+/* Inputs verticales tipo signup */
+.cliente-form-card .form-group {
+  margin-bottom: 0.9rem;
+}
+
+.cliente-form-card .form-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.cliente-form-card .form-control {
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.9rem;
+  background-color: #f9fafb;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+  .cliente-form-card .form-control:focus {
+    background-color: #ffffff;
+    border-color: #00a8ff;
+    box-shadow: 0 0 0 3px rgba(0, 168, 255, 0.25);
+  }
+
+/* Mensajes dentro de la tarjeta */
+.cliente-form-card .alert-danger {
+  margin-top: 0.4rem;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.8rem;
+}
+
+/* Botones alineados como footer de la card */
+.cliente-form-actions {
+  margin-top: 1.2rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+  /* Reforzamos los colores de botones para que combinen con la cabecera / tabla */
+  .cliente-form-actions .btn-success {
+    background: linear-gradient(90deg, #20bf6b, #0fb369);
+    border: none;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 0.55rem 1.4rem;
+  }
+
+    .cliente-form-actions .btn-success:hover {
+      background: linear-gradient(90deg, #16a058, #0b874d);
+      transform: translateY(-1px);
+    }
+
+  .cliente-form-actions .btn-secondary {
+    border-radius: 999px;
+    font-weight: 600;
+    padding: 0.55rem 1.4rem;
+    background-color: #e5e7eb;
+    color: #374151;
+  }
+
+    .cliente-form-actions .btn-secondary:hover {
+      background-color: #d1d5db;
+      transform: translateY(-1px);
+    }
+
+
+.field-error {
+  color: #dc2626; /* rojo intenso */
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
+  display: block;
+}
+/* 🔥 Fuerza todos los mensajes de validación a color rojo */
+.validation-message,
+.field-validation-error,
+.input-validation-error {
+  color: #e60000 !important; /* rojo */
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 6px;
+  display: block;
+}
+
+  /* ⚠️ Opcional: icono de alerta para mensajes de error */
+  .validation-message::before,
+  .field-validation-error::before {
+    content: "⚠️"; /* icono */
+    font-size: 0.9rem;
+  }
+/* ============================= */
+/* 🎨 FORMULARIOS DE LOTES       */
+/* ============================= */
+
+.form-card-body fieldset {
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  padding: 1.3rem 1.5rem;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+  margin-bottom: 1.4rem;
+}
+
+  .form-card-body fieldset legend {
+    padding: 0 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111827;
+  }
+
+.selected-product-summary {
+  border: 1px solid #d1d5db !important;
+  background-color: #f9fafb !important;
+  border-radius: 10px !important;
+}
+
+/* ✨ Inputs siempre uniformes */
+.form-card-body .form-control {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.92rem;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+  .form-card-body .form-control:focus {
+    border-color: #1abc9c;
+    box-shadow: 0 0 0 2px rgba(26,188,156,0.25);
+  }
+
+/* 📌 Mensajes de error Rojos + Icono */
+.validation-message,
+.field-validation-error {
+  color: #e60000 !important;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+  .validation-message::before,
+  .field-validation-error::before {
+    content: "⚠️";
+    font-size: 0.9rem;
+  }
+
+/* 💰 Advertencia precio < costo */
+.text-danger {
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 💾 Botón Guardar */
+.form-actions .btn-success {
+  background-color: #16a34a !important;
+  border: none;
+  padding: 12px 22px;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+  .form-actions .btn-success:hover {
+    background-color: #15803d !important;
+  }
+/* Tabla de productos para seleccionar lote */
+.table-theme tbody tr:hover {
+  background-color: #e0f7ff; /* un poquito más celeste */
+  cursor: pointer;
+}
+
+.table-theme tbody tr td:last-child .btn-primary {
+  background-color: #2563eb;
+  border: none;
+}
+
+  .table-theme tbody tr td:last-child .btn-primary:hover {
+    background-color: #1d4ed8;
+  }
+.success-message-box {
+  background-color: #d1fae5; /* Verde suave */
+  color: #065f46; /* Verde oscuro */
+  font-size: 1.1rem; /* Letras grandes */
+  font-weight: 700; /* Negrita */
+  padding: 14px 18px;
+  border-radius: 10px;
+  border: 2px solid #10b981; /* Borde verde */
+  text-align: center;
+}
+.validation-message {
+  color: #dc2626;
+  font-size: 0.9rem;
+}

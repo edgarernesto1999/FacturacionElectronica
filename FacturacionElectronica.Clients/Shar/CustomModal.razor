@@ -1,0 +1,40 @@
+@inject ModalService ModalService
+@implements IDisposable
+
+@if (ModalService.IsVisible)
+{
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal fade show animate__animated animate__fadeIn" tabindex="-1" style="display: block; z-index: 1050;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">
+                        <span class="oi oi-warning me-2"></span> @ModalService.Title
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <p>@ModalService.Message</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" @onclick="ModalService.Hide">
+                        Aceptar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Nos suscribimos al evento. Cada vez que el servicio cambie, este componente se re-renderizará.
+        ModalService.OnChange += StateHasChanged;
+    }
+
+    // Es importante desuscribirse para evitar fugas de memoria.
+    public void Dispose()
+    {
+        ModalService.OnChange -= StateHasChanged;
+    }
+}

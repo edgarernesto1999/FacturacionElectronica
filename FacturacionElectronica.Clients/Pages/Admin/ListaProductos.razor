@@ -19,13 +19,16 @@
         @if (selectedProduct == null)
         {
             <!-- VISTA 1: TABLA DE PRODUCTOS Y FILTROS -->
-            <!-- SECCIÓN DE FILTROS (CORREGIDA) -->
             <div class="filter-controls">
                 <!-- Filtro por Nombre -->
                 <div class="flex-grow-1">
-                    <input type="text" class="filter-control" placeholder="Filtrar por nombre..."
-                           @bind="NameFilter" @bind:event="oninput" />
+                    <input type="text"
+                           class="filter-control"
+                           placeholder="Filtrar por nombre..."
+                           @bind="NameFilter"
+                           @bind:event="oninput" />
                 </div>
+
                 <!-- Filtro por Categoría -->
                 <div class="flex-grow-1">
                     <select class="filter-control" @bind="CategoryFilter">
@@ -44,7 +47,9 @@
                         <tr>
                             <th>Nombre</th>
                             <th>Tipo (Categoría)</th>
-                            <th>Stock Disponible</th>  <!-- CAMBIO 1: Encabezado de la tabla -->
+                            <th>Marca</th>
+                            <th>Presentación</th>
+                            <th>Stock Disponible</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -53,6 +58,7 @@
                             // Lógica para calcular el stock y determinar el color del badge
                             var totalStock = producto.Lotes.Sum(lote => lote.CantidadDisponible);
                             var stockBadgeClass = "text-bg-success"; // Verde por defecto
+
                             if (totalStock == 0)
                             {
                                 stockBadgeClass = "text-bg-danger"; // Rojo si no hay stock
@@ -65,8 +71,9 @@
                             <tr @onclick="() => SelectProduct(producto)" style="cursor: pointer;">
                                 <td>@producto.Nombre</td>
                                 <td>@producto.TipoProducto</td>
+                                <td>@(producto.Marca ?? "-")</td>
+                                <td>@(producto.Presentacion ?? "-")</td>
                                 <td>
-                                    <!-- CAMBIO 2: Se muestra el stock total con su badge de color -->
                                     <span class="badge fs-6 @stockBadgeClass">
                                         @totalStock
                                     </span>
@@ -79,10 +86,12 @@
         }
         else
         {
-            <!-- VISTA 2: DETALLE DEL PRODUCTO SELECCIONADO (Sin cambios aquí) -->
+            <!-- VISTA 2: DETALLE DEL PRODUCTO SELECCIONADO -->
             <p class="text-muted-white mb-4">
-                Viendo los detalles de <strong>@selectedProduct.Nombre</strong>.
+                Viendo los detalles de <strong>@selectedProduct.Nombre</strong>
+                (@selectedProduct.TipoProducto, @(selectedProduct.Marca ?? "-"), @(selectedProduct.Presentacion ?? "-")).
             </p>
+
             <div class="card-body p-0">
                 @if (selectedProduct.Lotes.Any())
                 {
@@ -117,9 +126,12 @@
                 }
                 else
                 {
-                    <div class="alert alert-info text-center"><em>Este producto no tiene lotes registrados.</em></div>
+                    <div class="alert alert-info text-center">
+                        <em>Este producto no tiene lotes registrados.</em>
+                    </div>
                 }
             </div>
+
             <div class="form-actions">
                 <button class="btn btn-primary" @onclick="CloseDetailsView">
                     <span class="oi oi-check" aria-hidden="true"></span> Aceptar y Volver
@@ -139,11 +151,10 @@
 </div>
 
 @code {
-    // El código C# no necesita cambios, ya que el DTO `ProductWithLotesDto`
-    // ya contiene la información de los lotes necesaria para el cálculo.
     private List<ProductWithLotesDto> allProducts = new();
     private List<ProductWithLotesDto> filteredProducts = new();
     private List<string> uniqueCategories = new();
+
     private bool isLoading = true;
     private string? errorMessage;
     private ProductWithLotesDto? selectedProduct;
@@ -176,10 +187,24 @@
     {
         isLoading = true;
         errorMessage = null;
+
         try
         {
             allProducts = await ApiService.GetProductosConLotesAsync();
-            uniqueCategories = allProducts.Select(p => p.TipoProducto).Distinct().OrderBy(c => c).ToList();
+
+            // Por si el backend no envía Marca/Presentacion en todos los registros
+            foreach (var p in allProducts)
+            {
+                p.Marca ??= string.Empty;
+                p.Presentacion ??= string.Empty;
+            }
+
+            uniqueCategories = allProducts
+                .Select(p => p.TipoProducto)
+                .Distinct()
+                .OrderBy(c => c)
+                .ToList();
+
             ApplyFilters();
         }
         catch (Exception ex)
@@ -198,7 +223,8 @@
 
         if (!string.IsNullOrWhiteSpace(_nameFilter))
         {
-            query = query.Where(p => p.Nombre.Contains(_nameFilter, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(p =>
+                p.Nombre.Contains(_nameFilter, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!string.IsNullOrWhiteSpace(_categoryFilter))

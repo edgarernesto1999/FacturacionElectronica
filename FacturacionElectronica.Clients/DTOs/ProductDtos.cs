@@ -6,6 +6,8 @@ namespace FacturacionElectronica.Clients.DTOs
   public record ProductCreateDto(
       string TipoProducto,
       string Nombre,
+      string Marca, 
+      string Presentacion,
       bool Activo = true
   );
 
@@ -13,10 +15,11 @@ namespace FacturacionElectronica.Clients.DTOs
   public record ProductUpdateDto(
       string TipoProducto,
       string Nombre,
+      string Marca,
+      string Presentacion,
       bool Activo
   );
 
-  // --- CORRECCIÓN PRINCIPAL AQUÍ ---
   // DTO para mostrar los productos en una lista, sincronizado con tu API.
   public class ProductListItemDto
   {
@@ -29,6 +32,12 @@ namespace FacturacionElectronica.Clients.DTOs
 
     [JsonPropertyName("nombre")]
     public string Nombre { get; set; }
+
+    [JsonPropertyName("marca")]
+    public string Marca { get; set; } 
+
+    [JsonPropertyName("presentacion")]
+    public string Presentacion { get; set; }
 
     [JsonPropertyName("activo")]
     public bool Activo { get; set; }

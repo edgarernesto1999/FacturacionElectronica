@@ -11,7 +11,22 @@
         <div class="form-card">
             <div class="form-card-header">
                 <h3><span class="oi oi-layers"></span> Registrar Nuevo Lote de Producto</h3>
+                <p class="text-muted mb-0">
+                    @if (selectedProduct == null)
+                    {
+                        <span>Busque y seleccione un producto para continuar.</span>
+                    }
+                    else
+                    {
+                        <span>
+                            Complete los detalles del lote para
+                            <strong>@selectedProduct.Nombre</strong>
+                            (@selectedProduct.Marca - @selectedProduct.Presentacion).
+                        </span>
+                    }
+                </p>
             </div>
+
             <div class="form-card-body">
 
                 @if (!string.IsNullOrEmpty(successMessage))
@@ -25,29 +40,57 @@
 
                 @if (isLoading)
                 {
-                    <p class="text-center">Cargando productos...</p>
+                    <p class="text-center"><em><span class="spinner-border spinner-border-sm"></span> Cargando productos...</em></p>
                 }
                 else if (selectedProduct == null)
                 {
-                    <h4>Paso 1: Seleccione un Producto</h4>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
+                    <!-- ===================== SELECCIÓN DE PRODUCTO ===================== -->
+                    <div class="filter-controls">
+                        <input type="text"
+                               class="filter-control"
+                               placeholder="Filtrar por nombre..."
+                               @bind="NameFilter"
+                               @bind:event="oninput" />
+
+                        <input type="text"
+                               class="filter-control"
+                               placeholder="Filtrar por categoría..."
+                               @bind="CategoryFilter"
+                               @bind:event="oninput" />
+
+                        <input type="text"
+                               class="filter-control"
+                               placeholder="Filtrar por marca..."
+                               @bind="BrandFilter"
+                               @bind:event="oninput" />
+
+                        <input type="text"
+                               class="filter-control"
+                               placeholder="Filtrar por presentación..."
+                               @bind="PresentacionFilter"
+                               @bind:event="oninput" />
+                    </div>
+
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table-theme">
                             <thead>
                                 <tr>
-                                    <th>ID del Producto</th>
-                                    <th>Nombre del Producto</th>
-                                    <th>Tipo (Categoría)</th>
-                                    <th>Acción</th>
+                                    <th>Nombre</th>
+                                    <th>Categoría</th>
+                                    <th>Marca</th>
+                                    <th>Presentación</th>
+                                    <th class="text-center">Acción</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var producto in allProducts)
+                                @foreach (var producto in filteredProducts)
                                 {
                                     <tr>
-                                        <td>@producto.ProductId</td>
                                         <td>@producto.Nombre</td>
-                                        <td>@producto.TipoProducto</td> @* AHORA ESTO FUNCIONARÁ *@
-                                        <td>
+                                        <td>@producto.TipoProducto</td>
+                                        <td>@(producto.Marca ?? "-")</td>
+                                        <td>@(producto.Presentacion ?? "-")</td>
+                                        <td class="text-center">
                                             <button class="btn btn-sm btn-primary" @onclick="() => SelectProduct(producto)">
                                                 <span class="oi oi-check"></span> Seleccionar
                                             </button>
@@ -60,59 +103,95 @@
                 }
                 else
                 {
-                    <div class="selected-product-header mb-4">
-                        <h4>Producto: <span class="text-primary">@selectedProduct.Nombre</span></h4>
-                        <p class="text-muted" style="font-size: 0.9rem;">
-                            <span class="oi oi-info"></span> ID que se enviará a la API: <strong>@selectedProduct.ProductId</strong>
-                        </p>
-                        <button class="btn btn-sm btn-outline-secondary" @onclick="ClearSelection">
-                            <span class="oi oi-pencil"></span> Cambiar Producto
-                        </button>
+                    <!-- ===================== FORMULARIO PARA NUEVO LOTE ===================== -->
+                    <div class="cliente-form-wrapper">
+                        <div class="cliente-form-card cliente-form-card-create">
+                            <div class="cliente-form-card-header colored-header">
+                                <p>
+                                    Producto seleccionado:
+                                    <strong>@selectedProduct.Nombre</strong>
+                                    <span class="text-muted">
+                                        (@selectedProduct.TipoProducto, @selectedProduct.Marca, @selectedProduct.Presentacion)
+                                    </span>
+                                </p>
+                            </div>
+
+                            <div class="cliente-form-card-body">
+                                <EditForm Model="@loteFormModel" OnValidSubmit="HandleRegistrarLote">
+                                    <DataAnnotationsValidator />
+
+                                    <fieldset class="mb-4">
+                                        <legend class="h6">Detalles del Lote</legend>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Fecha de Compra</label>
+                                                <InputDate @bind-Value="loteFormModel.FechaCompra" class="form-control" />
+                                                <ValidationMessage For="@(() => loteFormModel.FechaCompra)" />
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Fecha de Expiración (Opcional)</label>
+                                                <InputDate @bind-Value="loteFormModel.FechaExpiracion" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </fieldset>
+
+                                    <fieldset>
+                                        <legend class="h6">Precios y Cantidad</legend>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Costo por Unidad</label>
+                                                <InputNumber @bind-Value="loteFormModel.CostoUnitario"
+                                                             class="form-control"
+                                                             placeholder="0.00" />
+                                                <ValidationMessage For="@(() => loteFormModel.CostoUnitario)" />
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Precio de Venta por Unidad</label>
+                                                <InputNumber @bind-Value="loteFormModel.PrecioVentaUnitario"
+                                                             class="form-control"
+                                                             placeholder="0.00" />
+                                                <ValidationMessage For="@(() => loteFormModel.PrecioVentaUnitario)" />
+
+                                                @if (IsPriceLowerThanCost)
+                                                {
+                                                    <div class="mt-2 text-danger" style="font-size: 0.875em;">
+                                                        <span class="oi oi-warning me-1"></span>
+                                                        El precio de venta es menor que el costo. No se generará ganancia.
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="col-md-12 mb-3">
+                                                <label class="form-label">Cantidad Comprada</label>
+                                                <InputNumber @bind-Value="loteFormModel.CantidadComprada"
+                                                             class="form-control"
+                                                             placeholder="0" />
+                                                <ValidationMessage For="@(() => loteFormModel.CantidadComprada)" />
+                                            </div>
+                                        </div>
+                                    </fieldset>
+
+                                    <div class="form-actions mt-4 pt-3 border-top">
+                                        <button type="submit" class="btn btn-success" disabled="@isSaving">
+                                            @if (isSaving)
+                                            {
+                                                <span class="spinner-border spinner-border-sm"></span>
+                                                <span> Guardando Lote...</span>
+                                            }
+                                            else
+                                            {
+                                                <span><span class="oi oi-plus"></span> Guardar Lote</span>
+                                            }
+                                        </button>
+                                        <button type="button"
+                                                class="btn btn-secondary"
+                                                @onclick="ClearSelection">
+                                            Cambiar producto
+                                        </button>
+                                    </div>
+                                </EditForm>
+                            </div>
+                        </div>
                     </div>
-
-                    <EditForm Model="@loteFormModel" OnValidSubmit="HandleRegistrarLote">
-                        <DataAnnotationsValidator />
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Fecha de Compra</label>
-                                <InputDate @bind-Value="loteFormModel.FechaCompra" class="form-control" />
-                                <ValidationMessage For="@(() => loteFormModel.FechaCompra)" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Fecha de Expiración (Opcional)</label>
-                                <InputDate @bind-Value="loteFormModel.FechaExpiracion" class="form-control" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Costo por Unidad</label>
-                                <InputNumber @bind-Value="loteFormModel.CostoUnitario" class="form-control" placeholder="0.00" />
-                                <ValidationMessage For="@(() => loteFormModel.CostoUnitario)" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Precio de Venta por Unidad</label>
-                                <InputNumber @bind-Value="loteFormModel.PrecioVentaUnitario" class="form-control" placeholder="0.00" />
-                                <ValidationMessage For="@(() => loteFormModel.PrecioVentaUnitario)" />
-                            </div>
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label">Cantidad Comprada</label>
-                                <InputNumber @bind-Value="loteFormModel.CantidadComprada" class="form-control" placeholder="0" />
-                                <ValidationMessage For="@(() => loteFormModel.CantidadComprada)" />
-                            </div>
-                        </div>
-
-                        <div class="form-actions mt-4">
-                            <button type="submit" class="btn btn-success" disabled="@isSaving">
-                                @if (isSaving)
-                                {
-                                    <span class="spinner-border spinner-border-sm"></span>
-                                    <span> Guardando Lote...</span>
-                                }
-                                else
-                                {
-                                    <span><span class="oi oi-plus"></span> Guardar Lote</span>
-                                }
-                            </button>
-                        </div>
-                    </EditForm>
                 }
             </div>
         </div>
@@ -125,18 +204,23 @@
         [Required(ErrorMessage = "La fecha de compra es obligatoria.")]
         public DateOnly FechaCompra { get; set; } = DateOnly.FromDateTime(DateTime.Now);
         public DateOnly? FechaExpiracion { get; set; }
+
         [Required(ErrorMessage = "El costo unitario es obligatorio.")]
         [Range(0.01, double.MaxValue, ErrorMessage = "El costo debe ser mayor que cero.")]
         public decimal CostoUnitario { get; set; }
+
         [Required(ErrorMessage = "El precio de venta es obligatorio.")]
         [Range(0.01, double.MaxValue, ErrorMessage = "El precio de venta debe ser mayor que cero.")]
         public decimal PrecioVentaUnitario { get; set; }
+
         [Required(ErrorMessage = "La cantidad es obligatoria.")]
         [Range(1, int.MaxValue, ErrorMessage = "La cantidad debe ser al menos 1.")]
         public int CantidadComprada { get; set; }
     }
 
     private List<ProductListItemDto> allProducts = new();
+    private List<ProductListItemDto> filteredProducts = new();
+
     private ProductListItemDto? selectedProduct;
     private LoteFormModel loteFormModel = new();
 
@@ -145,10 +229,41 @@
     private string? successMessage;
     private string? errorMessage;
 
-    protected override async Task OnInitializedAsync()
+    // === Filtros ===
+    private string _nameFilter = string.Empty;
+    private string NameFilter
     {
-        await LoadProducts();
+        get => _nameFilter;
+        set { _nameFilter = value; ApplyFilters(); }
     }
+
+    private string _categoryFilter = string.Empty;
+    private string CategoryFilter
+    {
+        get => _categoryFilter;
+        set { _categoryFilter = value; ApplyFilters(); }
+    }
+
+    private string _brandFilter = string.Empty;
+    private string BrandFilter
+    {
+        get => _brandFilter;
+        set { _brandFilter = value; ApplyFilters(); }
+    }
+
+    private string _presentacionFilter = string.Empty;
+    private string PresentacionFilter
+    {
+        get => _presentacionFilter;
+        set { _presentacionFilter = value; ApplyFilters(); }
+    }
+
+    private bool IsPriceLowerThanCost =>
+        loteFormModel.PrecioVentaUnitario > 0 &&
+        loteFormModel.CostoUnitario > 0 &&
+        loteFormModel.PrecioVentaUnitario < loteFormModel.CostoUnitario;
+
+    protected override async Task OnInitializedAsync() => await LoadProducts();
 
     private async Task LoadProducts()
     {
@@ -157,6 +272,15 @@
         try
         {
             allProducts = await ApiService.GetProductosAsync();
+
+            // Asegurar que Marca y Presentación no sean null al recibir del backend
+            foreach (var p in allProducts)
+            {
+                p.Marca ??= "";
+                p.Presentacion ??= "";
+            }
+
+            ApplyFilters();
         }
         catch (Exception ex)
         {
@@ -166,6 +290,40 @@
         {
             isLoading = false;
         }
+    }
+
+    private void ApplyFilters()
+    {
+        var query = allProducts.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(_nameFilter))
+        {
+            query = query.Where(p =>
+                p.Nombre.Contains(_nameFilter, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(_categoryFilter))
+        {
+            query = query.Where(p =>
+                p.TipoProducto != null &&
+                p.TipoProducto.Contains(_categoryFilter, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(_brandFilter))
+        {
+            query = query.Where(p =>
+                p.Marca != null &&
+                p.Marca.Contains(_brandFilter, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(_presentacionFilter))
+        {
+            query = query.Where(p =>
+                p.Presentacion != null &&
+                p.Presentacion.Contains(_presentacionFilter, StringComparison.OrdinalIgnoreCase));
+        }
+
+        filteredProducts = query.ToList();
     }
 
     private void SelectProduct(ProductListItemDto product)
@@ -179,6 +337,11 @@
     private void ClearSelection()
     {
         selectedProduct = null;
+        _nameFilter = "";
+        _categoryFilter = "";
+        _brandFilter = "";
+        _presentacionFilter = "";
+        ApplyFilters();
     }
 
     private async Task HandleRegistrarLote()

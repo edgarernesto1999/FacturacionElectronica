@@ -4,14 +4,19 @@ namespace FacturacionElectronica.Api.DTOs
   public record ProductCreateDto(
     string TipoProducto,
     String Nombre,
+    String Marca,
+    String Presentacion,
     bool Activo = true
+
     );
 
 //DTO para actualizar un producto existente
   public record ProductUpdateDto(
     string TipoProducto,
     string Nombre,
-    bool Activo
+    bool Activo,
+    String Marca,
+    String Presentacion
     );
 
 //DTO para mostrar los productos
@@ -20,7 +25,9 @@ namespace FacturacionElectronica.Api.DTOs
     string TipoProducto,
     string Nombre,
     bool Activo,
-    int stock
+    int stock,
+    String Marca,
+    String Presentacion
     );
 
 }

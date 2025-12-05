@@ -1,0 +1,515 @@
+@page "/admin/clientes"
+@layout AdminLayout
+@using FacturacionElectronica.Client.DTOs
+@using FacturacionElectronica.Clients.Services
+@inject ClienteApiService ApiService
+
+<div class="nav-card">
+    <div class="form-card-header">
+        <h3>
+            <span class="oi oi-briefcase"></span>
+            @if (showCreateForm)
+            {
+                <span>Agregar Nuevo Cliente</span>
+            }
+            else if (showEditForm)
+            {
+                <span>Editando a @clienteToEdit.Nombre @clienteToEdit.Apellido (@cedulaOfClientBeingEdited)</span>
+            }
+            else
+            {
+                <span>Gestión de Clientes</span>
+            }
+        </h3>
+    </div>
+
+    <div class="p-4">
+        @* ==================================================
+           VISTA 1: FORMULARIO DE CREACIÓN (tarjeta)
+           ================================================== *@
+        @if (showCreateForm)
+        {
+            <div class="cliente-form-wrapper">
+                <div class="cliente-form-card cliente-form-card-create">
+                    <div class="cliente-form-card-header colored-header">
+                        <h4>Agregar nuevo cliente</h4>
+                        <p>Completa la información para registrar un nuevo cliente.</p>
+                    </div>
+
+                    <EditForm Model="@newCliente" OnValidSubmit="HandleCreateSubmit">
+                        <DataAnnotationsValidator />
+
+                        <!-- Tipo de documento -->
+                        <div class="form-group">
+                            <label class="form-label">Tipo de documento</label>
+                            <InputSelect class="form-control" @bind-Value="selectedDocType">
+                                <option value="Cedula">Cédula</option>
+                                <option value="RUC">RUC</option>
+                                <option value="Pasaporte">Pasaporte</option>
+                            </InputSelect>
+                        </div>
+
+                        <!-- Número de documento -->
+                        <div class="form-group">
+                            <label class="form-label">@GetDocumentoLabel()</label>
+                            <InputText class="form-control" @bind-Value="newCliente.Cedula" />
+                            <ValidationMessage For="@(() => newCliente.Cedula)" />
+                            @if (!string.IsNullOrEmpty(documentValidationError))
+                            {
+                                <span class="field-error">@documentValidationError</span>
+                            }
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Nombre</label>
+                            <InputText class="form-control" @bind-Value="newCliente.Nombre" />
+                            <ValidationMessage For="@(() => newCliente.Nombre)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Apellido</label>
+                            <InputText class="form-control" @bind-Value="newCliente.Apellido" />
+                            <ValidationMessage For="@(() => newCliente.Apellido)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Dirección</label>
+                            <InputText class="form-control" @bind-Value="newCliente.Direccion" />
+                            <ValidationMessage For="@(() => newCliente.Direccion)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Correo</label>
+                            <InputText type="email" class="form-control" @bind-Value="newCliente.Correo" />
+                            <ValidationMessage For="@(() => newCliente.Correo)" />
+                            @if (!string.IsNullOrEmpty(emailValidationError))
+                            {
+                                <span class="field-error">@emailValidationError</span>
+                            }
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <InputText class="form-control" @bind-Value="newCliente.Telefono" />
+                            <ValidationMessage For="@(() => newCliente.Telefono)" />
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(formErrorMessage))
+                        {
+                            <div class="alert alert-danger">@formErrorMessage</div>
+                        }
+
+                        <div class="cliente-form-actions">
+                            <button type="submit" class="btn btn-success">
+                                <span class="oi oi-check"></span> Guardar Cliente
+                            </button>
+                            <button type="button" class="btn btn-secondary" @onclick="CancelAllForms">
+                                <span class="oi oi-x"></span> Cancelar
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        }
+        @* ==================================================
+           VISTA 2: FORMULARIO DE EDICIÓN (tarjeta)
+           ================================================== *@
+        else if (showEditForm)
+        {
+            <div class="cliente-form-wrapper">
+                <div class="cliente-form-card cliente-form-card-edit">
+                    <div class="cliente-form-card-header colored-header">
+                        <h4>Editando a @clienteToEdit.Nombre @clienteToEdit.Apellido (@cedulaOfClientBeingEdited)</h4>
+                        <p>
+                            Estás editando al cliente con Cédula:
+                            <strong>@cedulaOfClientBeingEdited</strong>
+                        </p>
+                    </div>
+
+                    <EditForm Model="@clienteToEdit" OnValidSubmit="HandleUpdateSubmit">
+                        <DataAnnotationsValidator />
+
+                        <div class="form-group">
+                            <label class="form-label">Nombre</label>
+                            <InputText class="form-control" @bind-Value="clienteToEdit.Nombre" />
+                            <ValidationMessage For="@(() => clienteToEdit.Nombre)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Apellido</label>
+                            <InputText class="form-control" @bind-Value="clienteToEdit.Apellido" />
+                            <ValidationMessage For="@(() => clienteToEdit.Apellido)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Dirección</label>
+                            <InputText class="form-control" @bind-Value="clienteToEdit.Direccion" />
+                            <ValidationMessage For="@(() => clienteToEdit.Direccion)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Correo</label>
+                            <InputText type="email" class="form-control" @bind-Value="clienteToEdit.Correo" />
+                            <ValidationMessage For="@(() => clienteToEdit.Correo)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <InputText class="form-control" @bind-Value="clienteToEdit.Telefono" />
+                            <ValidationMessage For="@(() => clienteToEdit.Telefono)" />
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(formErrorMessage))
+                        {
+                            <div class="alert alert-danger">@formErrorMessage</div>
+                        }
+
+                        <div class="cliente-form-actions">
+                            <button type="submit" class="btn btn-success">
+                                <span class="oi oi-check"></span> Guardar Cambios
+                            </button>
+                            <button type="button" class="btn btn-secondary" @onclick="CancelAllForms">
+                                <span class="oi oi-x"></span> Cancelar
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        }
+        @* ==================================================
+           VISTA 3: TABLA DE CLIENTES + FILTROS
+           ================================================== *@
+        else if (selectedCliente == null)
+        {
+            <div class="filter-controls">
+                <input type="text"
+                       class="filter-control"
+                       placeholder="Filtrar por cédula..."
+                       @bind="CedulaFilter"
+                       @bind:event="oninput" />
+
+                <input type="text"
+                       class="filter-control"
+                       placeholder="Filtrar por nombre o apellido..."
+                       @bind="NombreFilter"
+                       @bind:event="oninput" />
+            </div>
+
+            <div class="table-responsive">
+                <table class="table-theme">
+                    <thead>
+                        <tr>
+                            <th>Cédula</th>
+                            <th>Nombre Completo</th>
+                            <th>Dirección</th>
+                            <th>Correo</th>
+                            <th>Teléfono</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var cliente in filteredClientes)
+                        {
+                            <tr @onclick="() => SelectCliente(cliente)" style="cursor: pointer;">
+                                <td>@cliente.Cedula</td>
+                                <td>@cliente.Nombre @cliente.Apellido</td>
+                                <td>@(cliente.Direccion ?? "-")</td>
+                                <td>@(cliente.Correo ?? "-")</td>
+                                <td>@(cliente.Telefono ?? "-")</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info"
+                                            @onclick="() => ShowEditForm(cliente)"
+                                            @onclick:stopPropagation="true">
+                                        Editar
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Botón AGREGAR abajo de la tabla -->
+            <div class="mt-3 text-end">
+                <button class="btn btn-primary" @onclick="ShowCreateForm">
+                    <span class="oi oi-plus"></span> Agregar Cliente
+                </button>
+            </div>
+        }
+        @* ==================================================
+           VISTA 4: DETALLE DE CLIENTE SELECCIONADO
+           ================================================== *@
+        else
+        {
+            <h4 class="mb-3">
+                Detalles de: @selectedCliente.Nombre @selectedCliente.Apellido
+            </h4>
+
+            <div class="card cliente-detalle-card">
+                <div class="card-body">
+                    <p><strong>Cédula:</strong> @selectedCliente.Cedula</p>
+                    <p><strong>Dirección:</strong> @(selectedCliente.Direccion ?? "No especificada")</p>
+                    <p><strong>Correo:</strong> @(selectedCliente.Correo ?? "No especificado")</p>
+                    <p><strong>Teléfono:</strong> @(selectedCliente.Telefono ?? "No especificado")</p>
+                </div>
+            </div>
+
+            <div class="form-actions mt-4">
+                <button class="btn btn-primary" @onclick="CloseDetailsView">
+                    <span class="oi oi-arrow-left" aria-hidden="true"></span> Volver
+                </button>
+            </div>
+        }
+
+        @if (isLoading)
+        {
+            <p class="text-center mt-3"><em>Cargando...</em></p>
+        }
+        else if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger mt-3">@errorMessage</div>
+        }
+    </div>
+</div>
+
+@code {
+    // --- Estados de la UI ---
+    private bool isLoading = true;
+    private bool showCreateForm = false;
+    private bool showEditForm = false;
+    private string? errorMessage;
+    private string? formErrorMessage;
+
+    // --- Modelos de datos ---
+    private List<ClienteDto> allClientes = new();
+    private List<ClienteDto> filteredClientes = new();
+    private ClienteDto? selectedCliente;
+    private ClienteCreateDto newCliente = new();
+    private ClienteUpdateDto clienteToEdit = new();
+    private string? cedulaOfClientBeingEdited;
+
+    // --- Validación de formulario de creación ---
+    private string selectedDocType = "Cedula";
+    private string? documentValidationError;
+    private string? emailValidationError;
+
+    // --- Filtros ---
+    private string _cedulaFilter = string.Empty;
+    private string CedulaFilter
+    {
+        get => _cedulaFilter;
+        set
+        {
+            _cedulaFilter = value;
+            ApplyFilters();
+        }
+    }
+
+    private string _nombreFilter = string.Empty;
+    private string NombreFilter
+    {
+        get => _nombreFilter;
+        set
+        {
+            _nombreFilter = value;
+            ApplyFilters();
+        }
+    }
+
+    protected override async Task OnInitializedAsync() => await LoadClientes();
+
+    private async Task LoadClientes()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            allClientes = await ApiService.GetClientesAsync();
+            ApplyFilters();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar los clientes: {ex.Message}.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ApplyFilters()
+    {
+        var query = allClientes.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(_cedulaFilter))
+        {
+            query = query.Where(c =>
+                c.Cedula.Contains(_cedulaFilter, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(_nombreFilter))
+        {
+            query = query.Where(c =>
+                c.Nombre.Contains(_nombreFilter, StringComparison.OrdinalIgnoreCase) ||
+                c.Apellido.Contains(_nombreFilter, StringComparison.OrdinalIgnoreCase));
+        }
+
+        filteredClientes = query.ToList();
+    }
+
+    // --- Manejo de Vistas y Formularios ---
+    private void SelectCliente(ClienteDto cliente) => selectedCliente = cliente;
+    private void CloseDetailsView() => selectedCliente = null;
+
+    private void ShowCreateForm()
+    {
+        newCliente = new();
+        formErrorMessage = null;
+        documentValidationError = null;
+        emailValidationError = null;
+        selectedDocType = "Cedula";
+        showCreateForm = true;
+        showEditForm = false;
+        selectedCliente = null;
+    }
+
+    private void ShowEditForm(ClienteDto cliente)
+    {
+        cedulaOfClientBeingEdited = cliente.Cedula;
+        clienteToEdit = new ClienteUpdateDto
+        {
+            Nombre = cliente.Nombre,
+            Apellido = cliente.Apellido,
+            Direccion = cliente.Direccion,
+            Correo = cliente.Correo,
+            Telefono = cliente.Telefono
+        };
+
+        formErrorMessage = null;
+        showEditForm = true;
+        showCreateForm = false;
+        selectedCliente = null;
+    }
+
+    private void CancelAllForms()
+    {
+        showCreateForm = false;
+        showEditForm = false;
+        formErrorMessage = null;
+        documentValidationError = null;
+        emailValidationError = null;
+    }
+
+    // --- Lógica de API (Crear y Actualizar) ---
+    private async Task HandleCreateSubmit()
+    {
+        formErrorMessage = null;
+        documentValidationError = null;
+        emailValidationError = null;
+
+        // Validar documento y correo antes de llamar al API
+        bool docOk = ValidateDocumento(newCliente.Cedula, selectedDocType);
+        bool emailOk = ValidateEmail(newCliente.Correo);
+
+        if (!docOk)
+        {
+            documentValidationError = $"El {GetDocumentoLabel().ToLower()} no es válido.";
+        }
+
+        if (!emailOk)
+        {
+            emailValidationError = "El correo electrónico no es válido.";
+        }
+
+        if (!docOk || !emailOk)
+        {
+            formErrorMessage = "Por favor corrige los campos marcados en rojo.";
+            return;
+        }
+
+        try
+        {
+            await ApiService.CreateClienteAsync(newCliente);
+            CancelAllForms();
+            await LoadClientes();
+        }
+        catch (Exception ex)
+        {
+            formErrorMessage = $"Error al guardar el cliente: {ex.Message}";
+        }
+    }
+
+    private async Task HandleUpdateSubmit()
+    {
+        if (string.IsNullOrEmpty(cedulaOfClientBeingEdited))
+        {
+            formErrorMessage = "No se pudo identificar al cliente para actualizar.";
+            return;
+        }
+
+        formErrorMessage = null;
+
+        try
+        {
+            await ApiService.UpdateClienteAsync(cedulaOfClientBeingEdited, clienteToEdit);
+            CancelAllForms();
+            await LoadClientes();
+        }
+        catch (Exception ex)
+        {
+            formErrorMessage = $"Error al actualizar el cliente: {ex.Message}";
+        }
+    }
+
+    // --- Helpers de validación ---
+    private bool ValidateDocumento(string? value, string docType)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        value = value.Trim();
+
+        switch (docType)
+        {
+            case "Cedula":
+                // Cédula: 10 dígitos
+                return value.Length == 10 && value.All(char.IsDigit);
+            case "RUC":
+                // RUC: 13 dígitos
+                return value.Length == 13 && value.All(char.IsDigit);
+            case "Pasaporte":
+                // Pasaporte: 6-20 caracteres alfanuméricos
+                return value.Length >= 6 && value.Length <= 20 && value.All(c => char.IsLetterOrDigit(c));
+            default:
+                return false;
+        }
+    }
+
+    private bool ValidateEmail(string? email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email.Trim());
+            return addr.Address == email.Trim();
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private string GetDocumentoLabel()
+    {
+        return selectedDocType switch
+        {
+            "Cedula" => "Número de cédula",
+            "RUC" => "Número de RUC",
+            "Pasaporte" => "Número de pasaporte",
+            _ => "Documento de identificación"
+        };
+    }
+}

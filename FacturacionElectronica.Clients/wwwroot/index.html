@@ -6,32 +6,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FacturacionElectronica.Clients</title>
   <base href="/" />
-  <link rel="stylesheet" href="css/app.css" />
-  <link href="css/admin.css" rel="stylesheet" /> <!-- AÑADIR ESTA LÍNEA -->
-  <!-- If you add any scoped CSS files, uncomment the following to load them
-  <link href="FacturacionElectronica.Clients.styles.css" rel="stylesheet" /> -->
+
+  <!-- Bootstrap general -->
+  <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Login (app.css) y Admin (admin.css) SIEMPRE cargados -->
+  <!-- app.css SOLO debe tener estilos scoped al login (.login-container, .login-card, etc) -->
+  <link href="css/app.css" rel="stylesheet" />
+  <link href="css/admin.css" rel="stylesheet" />
+  <script src="js/loginAnimation.js"></script>
+
+
   <link href="manifest.webmanifest" rel="manifest" />
   <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
   <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+  <HeadOutlet />
 </head>
 
 <body>
-    <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
-    </div>
+  <div id="app">
+    <svg class="loading-progress">
+      <circle r="40%" cx="50%" cy="50%" />
+      <circle r="40%" cx="50%" cy="50%" />
+    </svg>
+    <div class="loading-progress-text"></div>
+  </div>
 
-    <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="" class="reload">Reload</a>
-        <a class="dismiss">🗙</a>
-    </div>
-    <script src="_framework/blazor.webassembly.js"></script>
-    <script>navigator.serviceWorker.register('service-worker.js');</script>
-    <script src="js/loginAnimation.js"></script>
+  <div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+  </div>
+
+  <script src="_framework/blazor.webassembly.js"></script>
+  <script>navigator.serviceWorker.register('service-worker.js');</script>
+  <script src="js/loginAnimation.js"></script>
 </body>
 
 </html>

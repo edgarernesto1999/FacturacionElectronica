@@ -1,38 +1,97 @@
 @* ================================================================== *@
-@* === Componente de la Barra Lateral de Navegación === *@
+@* ===   Barra Lateral de Navegación con secciones plegables      === *@
 @* ================================================================== *@
+@inject NavigationManager Nav
 
 <div class="sidebar">
-
     <div class="sidebar-header">
         Admin Panel
     </div>
 
     <nav class="flex-grow-1">
 
-        @* --- SECCIÓN DE PRODUCTOS --- *@
+        @* ---------- PRODUCTOS ---------- *@
+        <button type="button"
+                class="nav-section-toggle"
+                @onclick="ToggleProductos">
+            <span>Productos</span>
+            <span class="oi @(showProductos ? "oi-chevron-bottom" : "oi-chevron-right")"
+                  aria-hidden="true"></span>
+        </button>
 
-        <NavLink href="/admin/productos" Match="NavLinkMatch.All" class="nav-link">
-            <span class="oi oi-list-rich" aria-hidden="true"></span> Ver Stock
-        </NavLink>
+        @if (showProductos)
+        {
+            <NavLink href="/admin/productos" Match="NavLinkMatch.All" class="nav-link">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Ver Stock
+            </NavLink>
+            <NavLink href="/admin/productos/crear" class="nav-link">
+                <span class="oi oi-plus" aria-hidden="true"></span> Crear Nuevo Producto
+            </NavLink>
+            <NavLink href="/admin/productos/agregarlote" class="nav-link">
+                <span class="oi oi-layers" aria-hidden="true"></span> Agregar Lote
+            </NavLink>
+        }
 
-        <NavLink href="/admin/productos/crear" class="nav-link">
-            <span class="oi oi-plus" aria-hidden="true"></span> Crear Nuevo Producto
-        </NavLink>
-        <NavLink href="/admin/productos/agregarlote"  class="nav-link">
-            <span class="oi oi-plus" aria-hidden="true"></span> Agregar Lote de Productos
-        </NavLink>
+        @* ---------- CLIENTES ---------- *@
+        <button type="button"
+                class="nav-section-toggle"
+                @onclick="ToggleClientes">
+            <span>Clientes</span>
+            <span class="oi @(showClientes ? "oi-chevron-bottom" : "oi-chevron-right")"
+                  aria-hidden="true"></span>
+        </button>
 
-        @* --- SECCIÓN DE USUARIOS --- *@
+        @if (showClientes)
+        {
+            <NavLink href="/admin/clientes" class="nav-link">
+                <span class="oi oi-briefcase" aria-hidden="true"></span> Gestionar Clientes
+            </NavLink>
+        }
 
-        <NavLink href="/admin/usuarios" class="nav-link">
-            <span class="oi oi-people" aria-hidden="true"></span> Gestionar Usuarios
-        </NavLink>
+        @* ---------- SISTEMA / USUARIOS ---------- *@
+        <button type="button"
+                class="nav-section-toggle"
+                @onclick="ToggleSistema">
+            <span>Sistema</span>
+            <span class="oi @(showSistema ? "oi-chevron-bottom" : "oi-chevron-right")"
+                  aria-hidden="true"></span>
+        </button>
+
+        @if (showSistema)
+        {
+            <NavLink href="/admin/usuarios" class="nav-link">
+                <span class="oi oi-people" aria-hidden="true"></span> Gestionar Usuarios
+            </NavLink>
+        }
 
     </nav>
-
 </div>
 
 @code {
-    // Por ahora, este componente no necesita lógica en C#.
+    private bool showProductos;
+    private bool showClientes;
+    private bool showSistema;
+
+    protected override void OnInitialized()
+    {
+        var uri = Nav.Uri.ToLower();
+
+        // Abrir automáticamente la sección que corresponde a la ruta actual
+        if (uri.Contains("/admin/productos"))
+        {
+            showProductos = true;
+        }
+        if (uri.Contains("/admin/clientes"))
+        {
+            showClientes = true;
+        }
+        if (uri.Contains("/admin/usuarios"))
+        {
+            showSistema = true;
+        }
+    }
+
+    private void ToggleProductos() => showProductos = !showProductos;
+    private void ToggleClientes() => showClientes = !showClientes;
+    private void ToggleSistema() => showSistema = !showSistema;
 }

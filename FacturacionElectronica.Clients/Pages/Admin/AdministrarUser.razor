@@ -5,118 +5,120 @@
 @using FacturacionElectronica.Clients.Services
 @inject UsuarioApiService ApiService
 
-<!-- ================================================================== -->
-<!-- === LÓGICA DE RENDERIZADO PRINCIPAL === -->
-<!-- ================================================================== -->
 @if (isCreatingUser)
 {
-    <!-- ================================================================== -->
-    <!-- === VISTA 1: FORMULARIO DE CREACIÓN === -->
-    <!-- ================================================================== -->
-    <div class="nav-card animate__animated animate__fadeIn">
-        <div class="form-card-header">
-            <h3>
-                <span class="oi oi-person"></span>
-                Crear Nuevo Usuario
-            </h3>
-            <p class="text-muted mb-0">Complete los datos para registrar un nuevo miembro del equipo.</p>
-        </div>
+    <!-- ================================================== -->
+    <!-- =============== FORMULARIO CREAR USUARIO ========= -->
+    <!-- ================================================== -->
+    <div class="row justify-content-center animate__animated animate__fadeIn">
+        <div class="col-lg-8">
 
-        <div class="p-4">
-            <EditForm Model="@newUser" OnValidSubmit="@HandleCreateUser">
-                <DataAnnotationsValidator />
+            <div class="cliente-form-wrapper">
+                <div class="cliente-form-card cliente-form-card-create">
 
-                @if (!string.IsNullOrEmpty(errorMessage))
-                {
-                    <div class="alert alert-danger">@errorMessage</div>
-                }
-
-                <!-- SECCIÓN 1: INFORMACIÓN PERSONAL -->
-                <fieldset class="mb-4">
-                    <legend class="fs-5 border-bottom pb-2 mb-3">Información Personal</legend>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="nombre" class="form-label">Nombre</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><span class="oi oi-person"></span></span>
-                                    <InputText id="nombre" @bind-Value="newUser.Nombre" class="form-control" placeholder="Ej: Juan" />
-                                </div>
-                                <ValidationMessage For="@(() => newUser.Nombre)" />
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="apellido" class="form-label">Apellido</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><span class="oi oi-person"></span></span>
-                                    <InputText id="apellido" @bind-Value="newUser.Apellido" class="form-control" placeholder="Ej: Pérez" />
-                                </div>
-                                <ValidationMessage For="@(() => newUser.Apellido)" />
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
-
-                <!-- SECCIÓN 2: CREDENCIALES Y PERMISOS -->
-                <fieldset>
-                    <legend class="fs-5 border-bottom pb-2 mb-3">Credenciales y Permisos</legend>
-                    <div class="mb-3">
-                        <label for="correo" class="form-label">Correo Electrónico</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><span class="oi oi-envelope-closed"></span></span>
-                            <InputText id="correo" @bind-Value="newUser.Correo" class="form-control" placeholder="usuario@ejemplo.com" />
-                        </div>
-                        <ValidationMessage For="@(() => newUser.Correo)" />
+                    <!-- ======== HEADER ======== -->
+                    <div class="cliente-form-card-header colored-header bg-primary text-white">
+                        <h4><span class="oi oi-person"></span> Crear Nuevo Usuario</h4>
+                        <p>Complete los datos para registrar un nuevo usuario del sistema.</p>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="contrasena" class="form-label">Contraseña</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><span class="oi oi-lock-locked"></span></span>
-                                    <InputText id="contrasena" @bind-Value="newUser.Contrasena" type="password" class="form-control" placeholder="Mínimo 8 caracteres" />
-                                </div>
-                                <ValidationMessage For="@(() => newUser.Contrasena)" />
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="rol" class="form-label">Rol del Usuario</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><span class="oi oi-tag"></span></span>
-                                    <InputSelect id="rol" @bind-Value="newUser.Rol" class="form-select">
-                                        <option value="" disabled selected>Seleccione un rol</option>
-                                        <option value="admin">Administrador</option>
-                                        <option value="empleado">Empleado</option>
-                                    </InputSelect>
-                                </div>
-                                <ValidationMessage For="@(() => newUser.Rol)" />
-                            </div>
-                        </div>
-                    </div>
-                </fieldset>
+                    <!-- ======== CUERPO ======== -->
+                    <div class="cliente-form-card-body">
 
-                <!-- SECCIÓN 3: BOTONES DE ACCIÓN -->
-                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-                    <button type="button" class="btn btn-secondary" @onclick="CancelCreate">
-                        <span class="oi oi-x"></span> Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-success" disabled="@isSaving">
-                        <span class="oi oi-check"></span>
-                        @(isSaving ? "Guardando..." : "Confirmar y Guardar")
-                    </button>
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger text-center">@errorMessage</div>
+                        }
+
+                        <EditForm Model="@newUser" OnValidSubmit="@HandleCreateUser">
+                            <DataAnnotationsValidator />
+
+                            <!-- NOMBRE -->
+                            <div class="mb-3">
+                                <label class="form-label">Nombre</label>
+                                <InputText class="form-control"
+                                           @bind-Value="newUser.Nombre"
+                                           placeholder="Ej: Juan" />
+                                <ValidationMessage For="@(() => newUser.Nombre)" class="validation-message" />
+                            </div>
+
+                            <!-- APELLIDO -->
+                            <div class="mb-3">
+                                <label class="form-label">Apellido</label>
+                                <InputText class="form-control"
+                                           @bind-Value="newUser.Apellido"
+                                           placeholder="Ej: Pérez" />
+                                <ValidationMessage For="@(() => newUser.Apellido)" class="validation-message" />
+                            </div>
+
+                            <!-- CORREO -->
+                            <div class="mb-3">
+                                <label class="form-label">Correo Electrónico</label>
+                                <InputText class="form-control"
+                                           @bind-Value="newUser.Correo"
+                                           placeholder="usuario@ejemplo.com" />
+                                <ValidationMessage For="@(() => newUser.Correo)" class="validation-message" />
+                            </div>
+
+                            <!-- CONTRASEÑA -->
+                            <div class="mb-3">
+                                <label class="form-label">Contraseña</label>
+                                <InputText type="password"
+                                           class="form-control"
+                                           @bind-Value="newUser.Contrasena"
+                                           placeholder="Mínimo 8 caracteres" />
+                                <ValidationMessage For="@(() => newUser.Contrasena)" class="validation-message" />
+                            </div>
+
+                            <!-- ROL -->
+                            <div class="mb-3">
+                                <label class="form-label">Rol del Usuario</label>
+                                <InputSelect class="form-select" @bind-Value="newUser.Rol">
+                                    <option value="" disabled selected>Seleccione un rol</option>
+                                    <option value="admin">Administrador</option>
+                                    <option value="empleado">Empleado</option>
+                                </InputSelect>
+                                <ValidationMessage For="@(() => newUser.Rol)" class="validation-message" />
+                            </div>
+
+                            <!-- ======== BOTONES ======== -->
+                            <div class="form-actions mt-4 pt-3 border-top d-flex justify-content-between">
+                                <button type="button" class="btn btn-secondary" @onclick="CancelCreate">
+                                    <span class="oi oi-arrow-left"></span> Cancelar
+                                </button>
+
+                                <button type="submit" class="btn btn-success" disabled="@isSaving">
+                                    @if (isSaving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm"></span>
+                                    }
+                                    else
+                                    {
+                                        <span><span class="oi oi-check"></span> Guardar Usuario</span>
+                                    }
+                                </button>
+                            </div>
+                        </EditForm>
+
+                        @if (!string.IsNullOrEmpty(successMessage))
+                        {
+                            <div class="success-message-box text-center mt-3">
+                                @successMessage
+                            </div>
+                        }
+                    </div>
+
                 </div>
-            </EditForm>
+            </div>
+
         </div>
     </div>
 }
 else
 {
-    <!-- ================================================================== -->
-    <!-- === VISTA 2: TABLA DE USUARIOS EXISTENTES === -->
-    <!-- ================================================================== -->
+    <!-- ================================================== -->
+    <!-- =========== TABLA GESTIÓN DE USUARIOS ============ -->
+    <!-- ================================================== -->
     <div class="nav-card">
         <div class="form-card-header">
             <h3>
@@ -145,7 +147,6 @@ else
                     <table class="table-theme">
                         <thead>
                             <tr>
-                                <th>Id</th>
                                 <th>Nombre Completo</th>
                                 <th>Correo Electrónico</th>
                                 <th>Rol</th>
@@ -156,7 +157,6 @@ else
                             @foreach (var user in users)
                             {
                                 <tr>
-                                    <td>@user.Id</td>
                                     <td>@user.Nombre @user.Apellido</td>
                                     <td>@user.Correo</td>
                                     <td>@user.Rol</td>
@@ -185,25 +185,18 @@ else
     </div>
 }
 
-
 @code {
-    // --- ESTADO PARA LA TABLA ---
     private List<UserDto> users = new();
     private bool isLoading = true;
 
-    // --- ESTADO PARA EL FORMULARIO DE CREACIÓN ---
     private bool isCreatingUser = false;
     private bool isSaving = false;
     private CreateUserDto newUser = new();
 
-    // --- ESTADO PARA MENSAJES ---
     private string? errorMessage;
     private string? successMessage;
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadUsers();
-    }
+    protected override async Task OnInitializedAsync() => await LoadUsers();
 
     private async Task LoadUsers()
     {
@@ -231,10 +224,7 @@ else
         successMessage = null;
     }
 
-    private void CancelCreate()
-    {
-        isCreatingUser = false;
-    }
+    private void CancelCreate() => isCreatingUser = false;
 
     private async Task HandleCreateUser()
     {
@@ -262,10 +252,7 @@ else
     private async Task HandleStatusChange(UserDto user, ChangeEventArgs e)
     {
         var newStatus = e.Value?.ToString();
-        if (user == null || string.IsNullOrEmpty(newStatus))
-        {
-            return;
-        }
+        if (user == null || string.IsNullOrEmpty(newStatus)) return;
 
         var originalStatus = user.Estado;
         user.Estado = newStatus;
@@ -289,16 +276,12 @@ else
     }
 }
 
-<!-- ================================================================== -->
-<!-- === CSS PARA ESTILIZAR EL SELECT DE ESTADO === -->
-<!-- ================================================================== -->
 <style>
     .status-select {
         border-radius: 1rem;
         border-width: 2px;
         font-weight: 600;
         padding: 0.25rem 0.5rem;
-        width: auto;
         min-width: 100px;
         text-align: center;
     }
@@ -313,5 +296,37 @@ else
         background-color: rgba(108, 117, 125, 0.2);
         border-color: #6c757d;
         color: #6c757d;
+    }
+
+    /* Estilos compartidos con productos */
+    .cliente-form-card {
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 0 12px rgba(0,0,0,0.05);
+    }
+
+    .cliente-form-card-header {
+        padding: 1.2rem 1.5rem;
+        font-weight: 600;
+        border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .cliente-form-card-body {
+        padding: 1.5rem;
+    }
+
+    .validation-message {
+        color: #e74c3c;
+        font-size: 0.85rem;
+    }
+
+    .success-message-box {
+        padding: 0.75rem;
+        border-radius: 6px;
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
     }
 </style>

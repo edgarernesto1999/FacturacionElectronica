@@ -1,4 +1,3 @@
-// Ubicación: FacturacionElectronica.Clients/Program.cs
 using FacturacionElectronica.Clients;
 using FacturacionElectronica.Clients.Auth;
 using FacturacionElectronica.Clients.Services; 
@@ -24,17 +23,16 @@ public class Program
 
     builder.Services.AddScoped<ProductoApiService>();
     builder.Services.AddScoped<ToastService>();
+    builder.Services.AddScoped<ModalService>();
     builder.Services.AddScoped<UsuarioApiService>();
+    builder.Services.AddScoped<ClienteApiService>();
 
-    // --- CONFIGURACIÓN DE AUTENTICACIÓN (NO SE TOCA) ---
+    // --- CONFIGURACIÓN DE AUTENTICACIÓN (NO TOCAR XFA) ---
     builder.Services.AddAuthorizationCore();
     builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthenticationStateProvider>();
     builder.Services.AddScoped<AuthService>();
     // --- FIN DE LA CONFIGURACIÓN ---
 
-    // ==================================================================
-    // === AÑADE ESTA LÍNEA PARA REGISTRAR EL SERVICIO DE PRODUCTOS ===
-    // ==================================================================
     builder.Services.AddScoped<ProductoApiService>();
 
 

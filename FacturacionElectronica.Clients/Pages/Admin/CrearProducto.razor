@@ -5,67 +5,118 @@
 @using FacturacionElectronica.Clients.DTOs
 @using FacturacionElectronica.Clients.Services
 @inject ProductoApiService ApiService
+@inject NavigationManager Navigation
 
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <div class="form-card">
-            <div class="form-card-header">
-                <h3><span class="oi oi-box"></span> Crear Nuevo Producto</h3>
-            </div>
-            <div class="form-card-body">
-                @if (isLoading)
-                {
-                    <p>Cargando...</p>
-                }
-                else
-                {
-                    <EditForm Model="@formModel" OnValidSubmit="HandleCrearProducto">
-                        <DataAnnotationsValidator />
 
+        <div class="cliente-form-wrapper">
+            <div class="cliente-form-card cliente-form-card-create">
+
+                <!-- ========== HEADER ========== -->
+                <div class="cliente-form-card-header colored-header bg-primary text-white">
+                    <h4><span class="oi oi-box"></span> Crear Nuevo Producto</h4>
+                    <p>Registra un nuevo artículo en el inventario del sistema.</p>
+                </div>
+
+                <!-- ========== CUERPO DEL FORMULARIO ========== -->
+                <div class="cliente-form-card-body">
+
+                    @* Mensajes de error/duplicado arriba *@
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger text-center">@errorMessage</div>
+                    }
+                    @if (!string.IsNullOrEmpty(duplicateErrorMessage))
+                    {
+                        <div class="alert alert-warning text-center">@duplicateErrorMessage</div>
+                    }
+
+                    @if (isLoading)
+                    {
+                        <p class="text-center"><em>Cargando datos existentes...</em></p>
+                    }
+                    else
+                    {
+                        <EditForm Model="@formModel" OnValidSubmit="HandleCrearProducto">
+                            <DataAnnotationsValidator />
+
+                            <!-- Tipo de Producto -->
+                            <div class="mb-3">
+                                <label class="form-label">Tipo de Producto (Categoría)</label>
+                                <InputText class="form-control"
+                                           @bind-Value="formModel.TipoProducto"
+                                           list="tipos-producto-existentes"
+                                           placeholder="Ej: Lácteos, Limpieza, Bebidas" />
+                                <datalist id="tipos-producto-existentes">
+                                    @foreach (var tipo in tiposDeProducto)
+                                    {
+                                        <option value="@tipo"></option>
+                                    }
+                                </datalist>
+                                <ValidationMessage For="@(() => formModel.TipoProducto)" class="validation-message" />
+                            </div>
+
+                            <!-- Nombre -->
+                            <div class="mb-3">
+                                <label class="form-label">Nombre del Producto</label>
+                                <InputText class="form-control"
+                                           @bind-Value="formModel.Nombre"
+                                           placeholder="Ej: Leche Deslactosada 1L" />
+                                <ValidationMessage For="@(() => formModel.Nombre)" class="validation-message" />
+                            </div>
+
+                            <!-- Marca -->
+                            <div class="mb-3">
+                                <label class="form-label">Marca</label>
+                                <InputText class="form-control"
+                                           @bind-Value="formModel.Marca"
+                                           placeholder="Ej: Toni, Nestlé, La Favorita" />
+                                <ValidationMessage For="@(() => formModel.Marca)" class="validation-message" />
+                            </div>
+
+                            <!-- Presentación -->
+                            <div class="mb-3">
+                                <label class="form-label">Presentación</label>
+                                <InputText class="form-control"
+                                           @bind-Value="formModel.Presentacion"
+                                           placeholder="Ej: Botella 1L, Caja 12u, Sachet 900ml" />
+                                <ValidationMessage For="@(() => formModel.Presentacion)" class="validation-message" />
+                            </div>
+
+                            <!-- ========== BOTONES ========== -->
+                            <div class="form-actions mt-4 pt-3 border-top d-flex justify-content-between">
+                                <button type="button" class="btn btn-secondary"
+                                        @onclick='() => Navigation.NavigateTo("/admin/productos")'>
+                                    <span class="oi oi-arrow-left"></span> Volver a la Lista
+                                </button>
+
+                                <button type="submit" class="btn btn-success" disabled="@isSaving">
+                                    @if (isSaving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm"></span>
+                                        <span> Guardando...</span>
+                                    }
+                                    else
+                                    {
+                                        <span><span class="oi oi-plus"></span> Guardar Producto</span>
+                                    }
+                                </button>
+                            </div>
+                        </EditForm>
+
+                        @* MENSAJE DE ÉXITO DEBAJO DE LOS BOTONES *@
                         @if (!string.IsNullOrEmpty(successMessage))
                         {
-                            <div class="alert alert-success">@successMessage</div>
+                            <div class="success-message-box text-center mt-3">
+                                @successMessage
+                            </div>
                         }
-                        @if (!string.IsNullOrEmpty(errorMessage))
-                        {
-                            <div class="alert alert-danger">@errorMessage</div>
-                        }
-
-                        <div class="mb-3">
-                            <label class="form-label">Tipo de Producto (Categoría)</label>
-                            <InputText @bind-Value="formModel.TipoProducto" class="form-control" list="tipos-producto-existentes" placeholder="Ej: Lácteos" />
-                            <datalist id="tipos-producto-existentes">
-                                @foreach (var tipo in tiposDeProducto)
-                                {
-                                    <option value="@tipo"></option>
-                                }
-                            </datalist>
-                            <ValidationMessage For="@(() => formModel.TipoProducto)" />
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Nombre del Producto</label>
-                            <InputText @bind-Value="formModel.Nombre" class="form-control" placeholder="Ej: Leche Deslactosada 1L" />
-                            <ValidationMessage For="@(() => formModel.Nombre)" />
-                        </div>
-
-                        <div class="form-actions mt-4">
-                            <button type="submit" class="btn btn-primary" disabled="@isSaving">
-                                @if (isSaving)
-                                {
-                                    <span class="spinner-border spinner-border-sm"></span>
-                                    <span> Guardando...</span>
-                                }
-                                else
-                                {
-                                    <span><span class="oi oi-plus"></span> Guardar Producto</span>
-                                }
-                            </button>
-                        </div>
-                    </EditForm>
-                }
+                    }
+                </div>
             </div>
         </div>
+
     </div>
 </div>
 
@@ -73,10 +124,20 @@
     private class ProductoFormModel
     {
         [Required(ErrorMessage = "El tipo de producto es obligatorio.")]
-        public string TipoProducto { get; set; }
+        [StringLength(50, ErrorMessage = "El tipo no puede exceder los 50 caracteres.")]
+        public string TipoProducto { get; set; } = "";
 
         [Required(ErrorMessage = "El nombre del producto es obligatorio.")]
-        public string Nombre { get; set; }
+        [StringLength(100, ErrorMessage = "El nombre no puede exceder los 100 caracteres.")]
+        public string Nombre { get; set; } = "";
+
+        [Required(ErrorMessage = "La marca es obligatoria.")]
+        [StringLength(50, ErrorMessage = "La marca no puede exceder los 50 caracteres.")]
+        public string Marca { get; set; } = "";
+
+        [Required(ErrorMessage = "La presentación es obligatoria.")]
+        [StringLength(50, ErrorMessage = "La presentación no puede exceder los 50 caracteres.")]
+        public string Presentacion { get; set; } = "";
     }
 
     private ProductoFormModel formModel = new();
@@ -85,25 +146,31 @@
     private bool isSaving = false;
     private string? successMessage;
     private string? errorMessage;
+    private string? duplicateErrorMessage;
 
+    private HashSet<string> nombresDeProductoExistentes = new(StringComparer.OrdinalIgnoreCase);
     private List<string> tiposDeProducto = new();
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadInitialData();
-    }
+    protected override async Task OnInitializedAsync() => await LoadInitialData();
 
     private async Task LoadInitialData()
     {
         try
         {
-            // El servicio ahora devuelve el DTO correcto
             var productos = await ApiService.GetProductosAsync();
-            tiposDeProducto = productos.Select(p => p.ProductId.ToString()).Distinct().ToList();
+            nombresDeProductoExistentes = productos
+                .Select(p => p.Nombre.Trim())
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            tiposDeProducto = productos
+                .Select(p => p.TipoProducto)
+                .Distinct()
+                .OrderBy(tipo => tipo)
+                .ToList();
         }
         catch (Exception ex)
         {
-            errorMessage = $"Error fatal al cargar datos: {ex.Message}";
+            errorMessage = $"⚠ Error al cargar datos iniciales: {ex.Message}";
         }
         finally
         {
@@ -116,29 +183,46 @@
         isSaving = true;
         successMessage = null;
         errorMessage = null;
+        duplicateErrorMessage = null;
+
+        var nombreNormalizado = formModel.Nombre.Trim();
+
+        if (nombresDeProductoExistentes.Contains(nombreNormalizado))
+        {
+            duplicateErrorMessage = "⚠ El producto ya existe. Intente con otro nombre.";
+            isSaving = false;
+            return;
+        }
 
         try
         {
-            // Creamos el DTO correcto para la API
-            var request = new ProductCreateDto(formModel.TipoProducto, formModel.Nombre);
+            var request = new ProductCreateDto(
+                formModel.TipoProducto.Trim(),
+                nombreNormalizado,
+                formModel.Marca.Trim(),
+                formModel.Presentacion.Trim(),
+                true // Activo por defecto
+            );
 
-            HttpResponseMessage response = await ApiService.AddProductoAsync(request);
+            var response = await ApiService.AddProductoAsync(request);
 
             if (response.IsSuccessStatusCode)
             {
-                successMessage = $"¡Producto '{formModel.Nombre}' creado con éxito!";
+                successMessage = $"🎉 ¡Producto '{nombreNormalizado}' creado con éxito!";
+                nombresDeProductoExistentes.Add(nombreNormalizado);
+
+                // Reinicia el formulario pero mantiene la categoría para seguir creando productos similares
                 ResetForm();
-                await LoadInitialData(); // Recargar la lista de tipos de producto
             }
             else
             {
-                string errorContent = await response.Content.ReadAsStringAsync();
-                errorMessage = $"Error al guardar: {errorContent}";
+                var errorContent = await response.Content.ReadAsStringAsync();
+                errorMessage = $"⚠ Error del servidor: {errorContent}";
             }
         }
         catch (Exception ex)
         {
-            errorMessage = $"Error de conexión: {ex.Message}";
+            errorMessage = $"❌ Error de conexión: {ex.Message}";
         }
         finally
         {
@@ -148,6 +232,8 @@
 
     private void ResetForm()
     {
-        formModel = new();
+        // Conserva TipoProducto para facilitar el ingreso de varios productos de la misma categoría
+        var tipo = formModel.TipoProducto;
+        formModel = new ProductoFormModel { TipoProducto = tipo };
     }
 }
